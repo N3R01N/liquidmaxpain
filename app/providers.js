@@ -1,46 +1,65 @@
 "use client";
 import '@rainbow-me/rainbowkit/styles.css';
-import {NextUIProvider} from '@nextui-org/react'
+import { NextUIProvider } from '@nextui-org/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
-import { base } from 'wagmi/chains';
+import { mainnet, sepolia } from 'wagmi/chains';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { cookieStorage, createStorage, http} from 'wagmi'
+import { cookieStorage, createStorage, http } from 'wagmi'
 import { useState, useEffect } from 'react'
 import { QueryTriggerProvider } from './QueryTriggerContext';
-
+import { NFTProvider } from './context/NFTContext';
 
 export const config = getDefaultConfig({
-  appName: 'MUTATIO $FLIES',
-  projectId: 'fbc536a18c0f3b0d828632be8b67ec8c',
-  chains: [ base],
+  appName: 'LiquidMaxPain',
+  projectId: 'd7059c8929dc8c82fa4224da99a08219',
+  chains: [mainnet, sepolia],
   storage: createStorage({
     storage: cookieStorage
   }),
   transports: {
-    [base.id]: http()
+    [mainnet.id]: http(),
+    [sepolia.id]: http()
   },
 });
 
 const client = new QueryClient();
-
 
 export function Providers({ children }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
+  // Only render NFT providers after client-side mount to prevent hydration issues
+  const renderContent = () => {
+    if (!mounted) {
+      return (
+        <main className="dark text-foreground bg-background">
+          <div className="min-h-screen flex items-center justify-center">
+            {/* Optional: Add a loading spinner here */}
+          </div>
+        </main>
+      );
+    }
+
+    return (
+      <NFTProvider>
+        <main className="dark text-foreground bg-background">
+          {children}
+        </main>
+      </NFTProvider>
+    );
+  };
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={client}>
         <RainbowKitProvider>
-        <NextUIProvider>
-        <QueryTriggerProvider>
-        <main className="dark text-foreground bg-background">
-        {mounted && children}
-        </main>
-        </QueryTriggerProvider>
-        </NextUIProvider>
+          <NextUIProvider>
+            <QueryTriggerProvider>
+              {renderContent()}
+            </QueryTriggerProvider>
+          </NextUIProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
