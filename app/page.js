@@ -46,7 +46,7 @@ export default function Home() {
   }, []);
 
   return (
-      <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-24 py-4 text-[#72e536] tracking-tight">
+      <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-24 py-4 text-[#75ffba] tracking-tight">
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>$LiquidMaxPain</title>
@@ -54,7 +54,7 @@ export default function Home() {
         <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
           <div className='border-b-3 border-stone-600 pb-1'>
             <h1 className="md:text-7xl text-6xl mb-1">LiquidMaxPain</h1>
-            <h2 className="text-lg md:text-xl">Making the world a better place by providing liquidity for non-fungible tokens through a permissionless bonding curve</h2>
+            <h2 className="text-lg md:text-xl">Making the world a better place by unlocking liquidity for non-fungible tokens through a permissionless bonding curve</h2>
           </div>
           {balanceOfLiquidMaxPain && <h2 className='mt-1'>{balanceOfLiquidMaxPain} / 7394 liquified</h2>}
         </div>
@@ -72,7 +72,7 @@ export default function Home() {
         </div>
 
         <div className='flex flex-col text-center text-sm mt-2'>
-          <p><Link href={`https://x.com/XCOPYART`} className="text-[#72e536] text-sm">XCOPY</Link> is <u>not</u> affiliated with $LiquidMaxPain.</p>
+          <p><Link href={`https://x.com/XCOPYART`} className="text-[#75ffba] text-sm">XCOPY</Link> is <u>not</u> affiliated with $LiquidMaxPain.</p>
           <p>This is a community-run project.</p>
         </div>
         <div>

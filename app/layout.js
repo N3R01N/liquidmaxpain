@@ -4,13 +4,13 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 export const metadata = {
   title: "LiquidMaxPainToken",
-  description: "Making the world a better place by providing liquidity for non-fungible tokens through a permissionless bonding curve",
+  description: "Making the world a better place by unlocking liquidity for non-fungible tokens through a permissionless bonding curve",
   icons: {
     icon: '/favicon.svg',
   },
   openGraph: {
     title: "LiquidMaxPainToken",
-    description: "Making the world a better place by providing liquidity for non-fungible tokens through a permissionless bonding curve",
+    description: "Making the world a better place by unlocking liquidity for non-fungible tokens through a permissionless bonding curve",
     url: "https://mutatioflies.eth.limo",
     type: "website",
     images: [
@@ -25,7 +25,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "LiquidMaxPainToken",
-    description: "Making the world a better place by providing liquidity for non-fungible tokens through a permissionless bonding curve",
+    description: "Making the world a better place by unlocking liquidity for non-fungible tokens through a permissionless bonding curve",
     images: ["https://mutatioflies.eth.limo/FLIES_banner.jpg"],
   },
 };
