@@ -75,6 +75,9 @@ export default function Home() {
           <p><Link href={`https://x.com/XCOPYART`} className="text-[#75ffba] text-sm">XCOPY</Link> is <u>not</u> affiliated with $LiquidMaxPain.</p>
           <p>This is a community-run project.</p>
         </div>
+        <div className='flex flex-col text-center text-sm mt-2'>
+          <p>Also check out our friends at <Link href={`https://mutatioflies.com/`} className="text-[#72e536] text-sm">mutatioflies.com</Link></p>
+        </div>
         <div>
           <Image
             src="/MAX_PAIN.gif"
