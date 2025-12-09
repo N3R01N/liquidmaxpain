@@ -1,3 +1,3 @@
-[mutatioflies.eth](https://mutatioflies.eth.limo/) nextjs frontend
+[liquidmaxpain.eth](https://mutatioflies.eth.limo/) nextjs frontend
 
-contract address on base: 0x8b67f2E56139cA052a7EC49cBCd1aA9c83F2752a
+contract address : 0x17cA4AeA51fF267A91865cC79C88aa067aD5Ed28

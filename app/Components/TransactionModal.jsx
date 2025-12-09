@@ -1,6 +1,6 @@
 'use client';
-import { Modal, ModalContent, ModalBody } from "@nextui-org/react";
-import { Spinner } from "@nextui-org/react";
+import { Modal, ModalContent, ModalBody } from "@heroui/react";
+import { Spinner } from "@heroui/react";
 import { useEffect } from 'react';
 import { useChainId } from 'wagmi';
 

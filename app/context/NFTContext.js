@@ -1,10 +1,8 @@
-
 'use client';
 import { createContext, useContext, useState, useEffect } from 'react';
-import useSWR from 'swr';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAccount } from 'wagmi';
 
-// Create Context
 const NFTContext = createContext();
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
@@ -37,53 +35,49 @@ const fetchMaxPainInWallet = async (address) => {
     };
 };
 
-// Provider Component - now accepts two address props
 export function NFTProvider({ children }) {
-
     const [ready, setReady] = useState(false);
-     
-      useEffect(() => {
+    useEffect(() => {
         setReady(true);
-      }, []);
+    }, []);
 
-    const {address} = useAccount();
-    // Fetch data for first address
-    const { data: data1, error: error1, isLoading: isLoading1, mutate: mutate1 } = useSWR(
-        address ? `nfts-${address}` : null,
-        () => fetchMaxPainInWallet(address),
-        {
-            revalidateOnFocus: false,
-            revalidateOnReconnect: false,
-        }
-    );
+    const { address } = useAccount();
+    const queryClient = useQueryClient();
 
-    // Fetch data for second address
-    const { data: data2, error: error2, isLoading: isLoading2, mutate: mutate2 } = useSWR(
-        LiquidMaxPain_address ? `nfts-${LiquidMaxPain_address}` : null,
-        () => fetchMaxPainInWallet(LiquidMaxPain_address),
-        {
-            revalidateOnFocus: false,
-            revalidateOnReconnect: false,
-        }
-    );
+    // Fetch data for connected address
+    const { data: data1, isLoading: isLoading1, error: error1 } = useQuery({
+        queryKey: ['nfts', address],
+        queryFn: () => fetchMaxPainInWallet(address),
+        enabled: !!address && ready,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
+
+    // Fetch data for LiquidMaxPain address
+    const { data: data2, isLoading: isLoading2, error: error2 } = useQuery({
+        queryKey: ['nfts', LiquidMaxPain_address],
+        queryFn: () => fetchMaxPainInWallet(LiquidMaxPain_address),
+        enabled: !!LiquidMaxPain_address && ready,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
 
     // Combine states
     const isLoading = isLoading1 || isLoading2;
     const error = error1 || error2;
+    
+    // Mutate function invalidates both queries
     const mutate = () => {
-        mutate1();
-        mutate2();
+        queryClient.invalidateQueries({ queryKey: ['nfts'] });
     };
 
     const value = {
-        // First address data
         balanceOfConnectedAddress: data1?.balance || 0,
         ownedNftsByConnectedAddress: data1?.ownedNfts || [],
-
-        // Second address data
         balanceOfLiquidMaxPain: data2?.balance || 0,
         ownedNftsByLiquidMaxPain: data2?.ownedNfts || [],
-        
         isLoading,
         error,
         mutate,
@@ -92,7 +86,6 @@ export function NFTProvider({ children }) {
     return <NFTContext.Provider value={value}>{children}</NFTContext.Provider>;
 }
 
-// Custom Hook
 export const useNFTs = () => {
     const context = useContext(NFTContext);
     if (!context) {
