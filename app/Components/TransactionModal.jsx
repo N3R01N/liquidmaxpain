@@ -31,6 +31,10 @@ export default function TransactionModal({ isOpen, onClose, hash, isConfirming, 
             hideCloseButton={isConfirming}
             placement="center"
             backdrop="blur"
+             classNames={{
+    wrapper: "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1001]",
+    backdrop: "z-[1000]",
+  }}
         >
             <ModalContent className="bg-neutral-900 text-white">
                 <ModalBody className="flex flex-col items-center justify-center py-10 px-8">

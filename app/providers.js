@@ -6,7 +6,6 @@ import { mainnet, sepolia } from 'wagmi/chains';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { cookieStorage, createStorage, http } from 'wagmi';
 import { useState, useEffect } from 'react';
-import { QueryTriggerProvider } from './QueryTriggerContext';
 import { NFTProvider } from './context/NFTContext';
 import { HeroUIProvider } from '@heroui/react';
 
@@ -32,7 +31,6 @@ export function Providers({ children }) {
       <WagmiProvider config={config}>
         <QueryClientProvider client={client}>
           <RainbowKitProvider>
-            <QueryTriggerProvider>
               {mounted ? (
                 <NFTProvider>
                   <main className="dark text-foreground bg-background">
@@ -42,7 +40,6 @@ export function Providers({ children }) {
               ) : (
                 <div className="min-h-screen bg-black" /> // Prevents flash
               )}
-            </QueryTriggerProvider>
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

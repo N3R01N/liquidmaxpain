@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Select, SelectItem, Spinner, Card, CardHeader, CardBody, CardFooter } from "@heroui/react";
 import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useAccount, useReadContract } from "wagmi";
 import { useQueryClient } from '@tanstack/react-query';
-import { useQueryTrigger } from '../QueryTriggerContext';
 import { useNFTs } from '../context/NFTContext';
 import TransactionModal from './TransactionModal';
 import LiquidMaxPainToken_ABI from "../ABI/LiquidMaxPainToken_ABI.json";
@@ -11,7 +10,6 @@ import LiquidMaxPainToken_ABI from "../ABI/LiquidMaxPainToken_ABI.json";
 export default function Solidify() {
   const [maxPainToSolidify, setMaxPainToSolidify] = useState("");
   const [lqmptBalance, setLqmptBalance] = useState(0);
-  const { queryTrigger, toggleQueryTrigger } = useQueryTrigger();
   const { balanceOfLiquidMaxPain, ownedNftsByLiquidMaxPain, isLoading, mutate } = useNFTs();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -61,15 +59,10 @@ export default function Solidify() {
 
   useEffect(() => {
     if (solidifyMaxPainConfirmed) {
-      toggleQueryTrigger();
       setMaxPainToSolidify("");
       mutate();
     }
-  }, [solidifyMaxPainConfirmed, toggleQueryTrigger, mutate]);
-
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['balanceOf', address] });
-  }, [queryTrigger, queryClient, address]);
+  }, [solidifyMaxPainConfirmed, mutate]);
 
   return (
     <Card className='text-[#75ffba] bg-neutral-900 p-3 w-full md:w-auto border border-stone-600' shadow="lg">

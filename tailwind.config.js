@@ -12,13 +12,13 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#fc017d', // Your custom pink
+          DEFAULT: '#db5d1eff', // Your custom pink
           foreground: '#000000', // Text color
         },
-        danger: {
-          DEFAULT: '#e61531ff', // Your custom pink
-          foreground: '#f8f4f4ff', // Text color
-        },
+        original: {
+          DEFAULT: '#fc017d', // Your custom pink
+          foreground: '#000000', // Text color
+        }
       },
     },
   },

@@ -1,6 +1,6 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* CRITICAL: HeroUI CSS Variables */
 @layer base {
@@ -36,9 +36,20 @@
   font-style: normal;
 }
 
+
+@layer components {
+  .heroui-modal-wrapper {
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  }
+}
+
 body {
   font-family: 'Silkscreen', sans-serif;
-  background-color: black;
+}
+
+#__next {
+  min-height: 100vh;
+  background-color: black; 
 }
 
 .silkscreen-font {

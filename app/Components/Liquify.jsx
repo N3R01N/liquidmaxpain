@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Select, SelectItem, Spinner, Card, CardHeader, CardBody, CardFooter } from "@heroui/react";
+import { Button, Select, SelectItem, Spinner, Card, CardHeader, CardBody, CardFooter, Modal, ModalBody, ModalContent } from "@heroui/react";
 import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useAccount } from "wagmi";
-import { useQueryTrigger } from '../QueryTriggerContext';
 import { useNFTs } from '../context/NFTContext';
 import TransactionModal from './TransactionModal';
 import MAX_PAIN_ABI from "../ABI/MAX_PAIN_ABI.json";
@@ -12,11 +11,13 @@ const MAX_PAIN_address = process.env.NEXT_PUBLIC_MAX_PAIN_ADDRESS;
 
 export default function Liquify() {
     const [maxPainToLiquify, setMaxPainToLiquify] = useState("");
-    const { toggleQueryTrigger } = useQueryTrigger();
+
     const inputRef = useRef(null);
     const { address } = useAccount();
     const { balanceOfConnectedAddress, ownedNftsByConnectedAddress, isLoading, mutate } = useNFTs();
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isOpen, setOpen] = useState(false);
 
     const { data: simulateSendMaxPain } = useSimulateContract({
         address: MAX_PAIN_address,
@@ -34,10 +35,10 @@ export default function Liquify() {
     });
 
     useEffect(() => {
-        if (sendMaxPainHash && !sendMaxPainConfirmed) {
+        if (isConfirming) {
             setIsModalOpen(true);
         }
-    }, [sendMaxPainConfirmed, sendMaxPainHash]);
+    }, [isConfirming]);
 
     const closeModal = () => {
         if (!isWritePending && !isConfirming) {
@@ -47,11 +48,10 @@ export default function Liquify() {
 
     useEffect(() => {
         if (sendMaxPainConfirmed) {
-            toggleQueryTrigger();
             setMaxPainToLiquify("");
             mutate();
         }
-    }, [sendMaxPainConfirmed, toggleQueryTrigger, mutate]);
+    }, [sendMaxPainConfirmed, mutate]);
 
     useEffect(() => {
         if (inputRef.current && maxPainToLiquify != "") {
