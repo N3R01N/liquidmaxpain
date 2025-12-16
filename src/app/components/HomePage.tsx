@@ -4,13 +4,25 @@ import Image from "next/image";
 import Head from 'next/head';
 import { Button, Link } from "@heroui/react";
 import '@rainbow-me/rainbowkit/styles.css';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useSwitchChain, useConnection, useReadContract } from "wagmi";
+import { useSwitchChain, useConnection } from "wagmi";
 import { config } from '../wagmi.config'
 import Liquify from "./Liquify";
 import Solidify from "./Solidify";
 import { useNFTs } from '../context/NFTContext';
 import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
+
+import dynamic from 'next/dynamic';
+
+// Dynamic import with SSR disabled
+const RainbowKitProvider = dynamic(
+  () => import('@rainbow-me/rainbowkit').then((mod) => mod.RainbowKitProvider),
+  { ssr: false }
+);
+
+const ConnectButton = dynamic(
+  () => import('@rainbow-me/rainbowkit').then((mod) => mod.ConnectButton),
+  { ssr: false }
+);
 
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
