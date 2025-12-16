@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Select, ListBox, Card } from "@heroui/react";
-import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useConnection, useReadContract } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useConnection } from "wagmi";
 import { useNFTs } from '../context/NFTContext';
+import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
 import LiquidMaxPainToken_ABI_DEV from "../ABI/dev/LiquidMaxPainToken_ABI.json";
 import LiquidMaxPainToken_ABI_PROD from "../ABI/prod/LiquidMaxPainToken_ABI.json";
 import type { Key } from "react-aria-components";
@@ -16,30 +17,17 @@ const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? LiquidMa
 
 export default function Solidify() {
   const [selectedMaxPain, setSelectedMaxPain] = useState<Key | null>(null);
-  const [lqmptBalance, setLqmptBalance] = useState(0);
 
   const ONEHUNDRED_LQMPT = BigInt(100000000000000000000);
 
   // Wagmi hooks
   const { address } = useConnection({ config });
   const { balanceOfLiquidMaxPain, ownedNftsByLiquidMaxPain, mutate } = useNFTs();
+  const { balance: lqmptBalance, refetch } = useLiquidMaxPainToken();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: readBalanceOf, isSuccess: isSuccessBalanceOf } = useReadContract({
-    address: LQMPT_address,
-    abi: LiquidMaxPainToken_ABI,
-    functionName: 'balanceOf',
-    args: address ? [address] : undefined,
-  });
-
-  useEffect(() => {
-    if (isSuccessBalanceOf && readBalanceOf !== undefined) {
-      setLqmptBalance(readBalanceOf as number);
-    }
-  }, [readBalanceOf, isSuccessBalanceOf]);
-
-  const { data: simulateSolidifyMaxPain } = useSimulateContract({
+  const { data: simulateSolidifyMaxPain, isLoading: isSimulating, error: simulateError } = useSimulateContract({
     address: LQMPT_address,
     abi: LiquidMaxPainToken_ABI,
     functionName: 'solidify',
@@ -57,16 +45,28 @@ export default function Solidify() {
     if (solidifyMaxPainConfirmed) {
       setSelectedMaxPain(null);
       mutate();
+      refetch();
     }
-  }, [solidifyMaxPainConfirmed, mutate]);
+  }, [solidifyMaxPainConfirmed]);
+
+  useEffect(() => {
+    if (solidifyMaxPainHash && isConfirming) {
+      setIsModalOpen(true);
+    }
+  }, [solidifyMaxPainHash, isConfirming]);
 
   // Handle liquify button click
   const handleSolidify = () => {
     if (simulateSolidifyMaxPain?.request) {
-      setIsModalOpen(true);
       solidifyMaxPain(simulateSolidifyMaxPain?.request);
     }
   };
+
+  useEffect(() => {
+    if (simulateError) {
+      console.error("Simulation failed:", simulateError);
+    }
+  }, [simulateError]);
 
   // Add this effect to handle auto-close
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function Solidify() {
 
             <Button
               variant="primary"
-              isDisabled={balanceOfLiquidMaxPain == 0 || lqmptBalance < ONEHUNDRED_LQMPT || !selectedMaxPain}
+              isDisabled={balanceOfLiquidMaxPain == 0 || lqmptBalance < ONEHUNDRED_LQMPT || !selectedMaxPain || isSimulating}
               onPress={handleSolidify}
               className="mt-2 w-full bg-[#fc017d] text-black font-bold hover:bg-[#e0016f] active:bg-[#c80161] transition-all duration-200"
             >

@@ -5,6 +5,7 @@ import { Button, Select, Card, ListBox } from "@heroui/react";
 import type { Key } from "react-aria-components";
 import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useConnection } from "wagmi";
 import { useNFTs } from '../context/NFTContext';
+import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
 import MAX_PAIN_ABI_DEV from '../ABI/dev/MAX_PAIN_ABI.json';
 import MAX_PAIN_ABI_PROD from '../ABI/prod/MAX_PAIN_ABI.json';
 import { config } from '../wagmi.config';
@@ -23,6 +24,7 @@ export default function Liquify() {
     // Wagmi hooks
     const { address } = useConnection({ config });
     const { balanceOfConnectedAddress, ownedNftsByConnectedAddress, mutate } = useNFTs();
+    const { refetch } = useLiquidMaxPainToken();
 
     // Simulate contract call
     const { data: simulateSendMaxPain, isLoading: isSimulating, error: simulateError } = useSimulateContract({
@@ -47,8 +49,9 @@ export default function Liquify() {
         if (sendMaxPainConfirmed) {
             setSelectedMaxPain(null);
             mutate();
+            refetch();
         }
-    }, [sendMaxPainConfirmed, mutate]);
+    }, [sendMaxPainConfirmed]);
 
     useEffect(() => {
         if (simulateError) {
@@ -63,20 +66,15 @@ export default function Liquify() {
         }
     }, [sendMaxPainConfirmed, isModalOpen]);
 
+    useEffect(() => {
+        if (sendMaxPainHash && isConfirming) {
+            setIsModalOpen(true);
+        }
+    }, [sendMaxPainHash, isConfirming]);
+
     // Handle liquify button click
     const handleLiquify = () => {
-        console.log("Handle Liquify called");
-        console.log(simulateSendMaxPain)
-        console.log({
-            address: MAX_PAIN_address,
-            abi: MAX_PAIN_ABI,
-            functionName: 'safeTransferFrom',
-            args: [address, LiquidMaxPain_address, selectedMaxPain],
-            account: address,
-            query: { enabled: !!address && !!selectedMaxPain },
-        })
         if (simulateSendMaxPain?.request) {
-            setIsModalOpen(true);
             sendMaxPain(simulateSendMaxPain.request);
         }
     };

@@ -23,25 +23,6 @@ export default function TransactionModal({ isOpen, hash, isConfirming, isConfirm
 
     const chainId = useChainId({ config });
 
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    // Initialize audio when modal opens
-    useEffect(() => {
-        if (isOpen && !audioRef.current) {
-            audioRef.current = new Audio('/Voicy_Max_Payne.mp3');
-            audioRef.current.volume = 0.3;
-        }
-    }, [isOpen]);
-
-    // Auto-close after 3 seconds on success
-    useEffect(() => {
-        if (isConfirmed && audioRef.current) {
-            audioRef.current.play().catch(err => {
-                console.warn('Audio blocked by browser - requires user interaction:', err);
-            });
-        }
-    }, [isConfirmed]);
-
     const getExplorerUrl = () => {
         const explorers = {
             1: 'https://etherscan.io',       // Mainnet
@@ -52,7 +33,6 @@ export default function TransactionModal({ isOpen, hash, isConfirming, isConfirm
     };
 
     return (
-
         <Modal>
             <Modal.Container isOpen={isOpen}>
                 <Modal.Dialog className="bg-neutral-900 text-white">
@@ -116,6 +96,5 @@ export default function TransactionModal({ isOpen, hash, isConfirming, isConfirm
                 </Modal.Dialog>
             </Modal.Container>
         </Modal>
-
     );
 }

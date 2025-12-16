@@ -5,20 +5,31 @@ import Head from 'next/head';
 import { Button, Link } from "@heroui/react";
 import '@rainbow-me/rainbowkit/styles.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useSwitchChain, useConnection } from "wagmi";
+import { useSwitchChain, useConnection, useReadContract } from "wagmi";
 import { config } from '../wagmi.config'
 import Liquify from "./Liquify";
 import Solidify from "./Solidify";
 import { useNFTs } from '../context/NFTContext';
+import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
+
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
+
 const desiredNetworkId = 1;
 
 export default function Home() {
   const [isClientSide, setIsClientSide] = useState(false);
   const { balanceOfLiquidMaxPain } = useNFTs();
+  const { balance: lqmptBalance } = useLiquidMaxPainToken();
   const { isConnected, chain } = useConnection({ config });
+  console.log("Current chain:", lqmptBalance);
+
   const { mutate } = useSwitchChain();
+
+  const formatter = new Intl.NumberFormat('en-EN', {
+    style: 'percent',
+    maximumFractionDigits: 2,
+  });
 
   useEffect(() => {
     document.title = '~LiquidMaxPain~';
@@ -54,11 +65,24 @@ export default function Home() {
           </Button>
         ) : (
           <ConnectButton
-            chainStatus="none"
+            label="Connect Wallet"
+            chainStatus={{
+              smallScreen: 'none',
+              largeScreen: 'icon',
+            }}
             showBalance={false}
-            accountStatus="address"
+            accountStatus={{
+              smallScreen: 'avatar',
+              largeScreen: 'full',
+            }}
           />
         )}</div>
+
+      <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
+        <div className='border-b-3 border-stone-600 pb-1'>
+          <h2 className="text-lg md:text-xl">You have {lqmptBalance ? formatter.format((BigInt(lqmptBalance) / BigInt(10 ** 20))) : formatter.format(0)} Max Pain</h2>
+        </div>
+      </div>
 
       <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
         <Liquify />
