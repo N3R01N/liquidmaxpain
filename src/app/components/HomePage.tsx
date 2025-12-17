@@ -5,25 +5,12 @@ import Head from 'next/head';
 import { Button, Link } from "@heroui/react";
 import '@rainbow-me/rainbowkit/styles.css';
 import { useSwitchChain, useConnection } from "wagmi";
-import { config } from '../wagmi.config'
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { createWagmiConfig } from '../wagmi.config';
 import Liquify from "./Liquify";
 import Solidify from "./Solidify";
 import { useNFTs } from '../context/NFTContext';
 import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
-
-import dynamic from 'next/dynamic';
-
-// Dynamic import with SSR disabled
-const RainbowKitProvider = dynamic(
-  () => import('@rainbow-me/rainbowkit').then((mod) => mod.RainbowKitProvider),
-  { ssr: false }
-);
-
-const ConnectButton = dynamic(
-  () => import('@rainbow-me/rainbowkit').then((mod) => mod.ConnectButton),
-  { ssr: false }
-);
-
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
 
@@ -33,8 +20,7 @@ export default function Home() {
   const [isClientSide, setIsClientSide] = useState(false);
   const { balanceOfLiquidMaxPain } = useNFTs();
   const { balance: lqmptBalance } = useLiquidMaxPainToken();
-  const { isConnected, chain } = useConnection({ config });
-  console.log("Current chain:", lqmptBalance);
+  const { isConnected, chain } = useConnection();
 
   const { mutate } = useSwitchChain();
 

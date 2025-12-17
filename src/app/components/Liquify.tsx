@@ -8,7 +8,6 @@ import { useNFTs } from '../context/NFTContext';
 import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
 import MAX_PAIN_ABI_DEV from '../ABI/dev/MAX_PAIN_ABI.json';
 import MAX_PAIN_ABI_PROD from '../ABI/prod/MAX_PAIN_ABI.json';
-import { config } from '../wagmi.config';
 import { MaxPainType } from '../context/Types';
 import TransactionModal from './TransactionModal';
 
@@ -22,7 +21,7 @@ export default function Liquify() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Wagmi hooks
-    const { address } = useConnection({ config });
+    const { address } = useConnection();
     const { balanceOfConnectedAddress, ownedNftsByConnectedAddress, mutate } = useNFTs();
     const { refetch } = useLiquidMaxPainToken();
 

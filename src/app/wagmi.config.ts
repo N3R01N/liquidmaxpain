@@ -1,10 +1,10 @@
-import { createConfig, http } from 'wagmi'
-import { mainnet, sepolia } from 'wagmi/chains'
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { mainnet, sepolia } from 'wagmi/chains';
 
-export const config = createConfig({
-  chains: [mainnet, sepolia],
-  transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
-  },
-})
+export function createWagmiConfig(projectId: string) {
+    return getDefaultConfig({
+        appName: 'LiquidMaxPain',
+        projectId,
+        chains: [mainnet, sepolia],
+    });
+}

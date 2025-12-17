@@ -8,7 +8,6 @@ import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
 import LiquidMaxPainToken_ABI_DEV from "../ABI/dev/LiquidMaxPainToken_ABI.json";
 import LiquidMaxPainToken_ABI_PROD from "../ABI/prod/LiquidMaxPainToken_ABI.json";
 import type { Key } from "react-aria-components";
-import { config } from '../wagmi.config';
 import { MaxPainType } from '../context/Types';
 import TransactionModal from './TransactionModal';
 
@@ -21,7 +20,7 @@ export default function Solidify() {
   const ONEHUNDRED_LQMPT = BigInt(100000000000000000000);
 
   // Wagmi hooks
-  const { address } = useConnection({ config });
+  const { address } = useConnection();
   const { balanceOfLiquidMaxPain, ownedNftsByLiquidMaxPain, mutate } = useNFTs();
   const { balance: lqmptBalance, refetch } = useLiquidMaxPainToken();
 

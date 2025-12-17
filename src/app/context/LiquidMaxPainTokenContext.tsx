@@ -1,7 +1,6 @@
 'use client';
 import { createContext, useContext } from 'react';
 import { useReadContract, useConnection } from 'wagmi';
-import { config } from '../wagmi.config';
 import type { ReactNode } from 'react';
 import LiquidMaxPainToken_ABI_DEV from "../ABI/dev/LiquidMaxPainToken_ABI.json";
 import LiquidMaxPainToken_ABI_PROD from "../ABI/prod/LiquidMaxPainToken_ABI.json";
@@ -22,7 +21,7 @@ const LiquidMaxPainTokenContext = createContext<LiquidMaxPainTokenContextType>({
 });
 
 export function LiquidMaxPainTokenProvider({ children }: { children: ReactNode }) {
-    const { address } = useConnection({ config });
+    const { address } = useConnection();
 
     // ✅ Use the hook directly - no unnecessary state copying
     const { data: balance, refetch, isLoading } = useReadContract({

@@ -3,7 +3,6 @@ import { Modal, Button } from "@heroui/react";
 import Image from "next/image";
 import { useEffect, useRef } from 'react';
 import { useChainId } from 'wagmi';
-import { config } from '../wagmi.config';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -21,7 +20,7 @@ interface ImageInterface {
 
 export default function TransactionModal({ isOpen, hash, isConfirming, isConfirmed, action, image }: TransactionModalProps) {
 
-    const chainId = useChainId({ config });
+    const chainId = useChainId() as 1 | 11155111;
 
     const getExplorerUrl = () => {
         const explorers = {

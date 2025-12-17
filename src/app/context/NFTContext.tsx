@@ -2,10 +2,10 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useConnection } from 'wagmi';
-import { config } from '../wagmi.config';
 import { MaxPainType } from './Types';
 import type { ReactNode } from 'react';
 import { Address } from 'viem';
+import { useConfig } from '../hooks/useConfig';
 
 interface NFTContextType {
     balanceOfConnectedAddress: number;
@@ -29,11 +29,10 @@ const defaultContext = {
 const NFTContext = createContext<NFTContextType>(defaultContext);
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
-const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 const alchemyNftEndpoint = process.env.NEXT_PUBLIC_ALCHEMY_NFT_URL;
 const maxPainAddress = process.env.NEXT_PUBLIC_MAX_PAIN_ADDRESS;
 
-const fetchMaxPainInWallet = async (address: Address) => {
+const fetchMaxPainInWallet = async (address: Address, alchemyApiKey: string) => {
     if (!address) {
         return { balance: 0, ownedNfts: [] };
     }
@@ -59,7 +58,7 @@ const fetchMaxPainInWallet = async (address: Address) => {
 export function NFTProvider({ children }: { children: ReactNode }) {
     // ✅ ALL hooks at the top level - UNCONDITIONAL
     const [ready, setReady] = useState(false);
-    const { address } = useConnection({ config });
+    const { address } = useConnection();
     const queryClient = useQueryClient();
 
     // ✅ useEffect stays at top level
@@ -67,19 +66,21 @@ export function NFTProvider({ children }: { children: ReactNode }) {
         setReady(true);
     }, []);
 
+    const appConfig = useConfig();
+
     // ✅ useQuery hooks are ALWAYS called, but conditionally enabled
     const { data: data1, isLoading: isLoading1, error: error1 } = useQuery({
         queryKey: ['nfts', address],
-        queryFn: () => fetchMaxPainInWallet(address!),
-        enabled: !!address && ready && !!LiquidMaxPain_address,
+        queryFn: () => fetchMaxPainInWallet(address!, appConfig?.apiKey!),
+        enabled: !!address && ready && !!appConfig?.apiKey,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
 
     const { data: data2, isLoading: isLoading2, error: error2 } = useQuery({
         queryKey: ['nfts', LiquidMaxPain_address],
-        queryFn: () => fetchMaxPainInWallet(LiquidMaxPain_address!),
-        enabled: !!LiquidMaxPain_address && ready,
+        queryFn: () => fetchMaxPainInWallet(LiquidMaxPain_address!, appConfig?.apiKey!),
+        enabled: !!LiquidMaxPain_address && ready && !!appConfig?.apiKey,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
