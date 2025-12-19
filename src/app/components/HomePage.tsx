@@ -59,43 +59,66 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-24 py-4 text-[#75ffba] tracking-tight">
+    <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-6 text-[#75ffba] tracking-tight">
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>$LiquidMaxPain</title>
       </Head>
-      <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
-        <div className='border-b-3 border-stone-600 pb-1'>
-          <h1 className="md:text-7xl text-6xl mb-1">LiquidMaxPain</h1>
-          <h2 className="text-lg md:text-xl">Making the world a better place by unlocking liquidity for non-fungible tokens through a permissionless bonding curve</h2>
+
+      <div className='bg-neutral-900 p-4 sm:p-6 rounded-xl flex flex-col items-center text-center w-full max-w-4xl mx-auto'>
+        <div className='border-b-4 border-stone-600 pb-4 w-full'>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-2 leading-tight">
+            <span className="block sm:inline">Liquid</span><span className="block sm:inline">MaxPain</span>
+          </h1>
+          <h2 className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            Making the world a better place by unlocking liquidity for non-fungible tokens through a permissionless bonding curve and other tech buzzword mumbo jumbo.
+          </h2>
         </div>
-        {balanceOfLiquidMaxPain && <h2 className='mt-1'>{balanceOfLiquidMaxPain} / 7394 liquified</h2>}
+
+        {balanceOfLiquidMaxPain && (
+          <h2 className='mt-4 text-sm sm:text-base'>
+            {balanceOfLiquidMaxPain} / 7394 liquified
+          </h2>
+        )}
       </div>
 
-      <div className='my-3'>
+      <div className='my-4 sm:my-6 w-full max-w-sm mx-auto px-4'>
         {chain?.id !== desiredNetworkId && isConnected ? (
           <Button
             variant="primary"
-            className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold px-8 py-4 text-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+            className="bg-gradient-to-r from-red-500 to-red-600 text-white 
+               font-bold 
+               w-full 
+               py-4 sm:py-3.5 
+               text-sm sm:text-base 
+               hover:from-red-600 hover:to-red-700 
+               active:from-red-700 active:to-red-800
+               transition-all duration-200 
+               shadow-md sm:shadow-lg 
+               rounded-xl 
+               tracking-wide
+               min-h-[48px]
+               active:scale-95"
             onPress={handleSwitchChain}
           >
             Switch to Ethereum Mainnet
           </Button>
         ) : (
-          <ConnectButton
-            label="Connect Wallet"
-            chainStatus={{
-              smallScreen: 'none',
-              largeScreen: 'icon',
-            }}
-            showBalance={false}
-            accountStatus={{
-              smallScreen: 'avatar',
-              largeScreen: 'full',
-            }}
-          />
+          <div className="flex justify-center">
+            <ConnectButton
+              label="Connect Wallet"
+              chainStatus={{
+                smallScreen: 'icon',
+                largeScreen: 'icon',
+              }}
+              showBalance={false}
+              accountStatus={{
+                smallScreen: 'full',
+                largeScreen: 'full',
+              }}
+            />
+          </div>
         )}</div>
-
       <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
         <div className='border-b-3 border-stone-600 pb-1'>
           <h2 className="text-lg md:text-xl">You have {lqmptBalance ? formatter.format((BigInt(lqmptBalance) / BigInt(10 ** 20))) : formatter.format(0)} Max Pain</h2>
@@ -155,6 +178,7 @@ export default function Home() {
             height={30}
             alt="dexscreener"
           /></Link>
+        {/** for now disabled
         <Link href={`https://www.coingecko.com/de/munze/mutatio-flies`} >
           <Image
             src="/coingecko.png"
@@ -162,6 +186,7 @@ export default function Home() {
             height={30}
             alt="coingecko"
           /></Link>
+          */}
         <Link href={`https://app.uniswap.org/add/ETH/${LiquidMaxPain_address}/10000`}>
           <Image
             src="/uniswap.png"
