@@ -14,7 +14,11 @@ import TransactionModal from './TransactionModal';
 const LQMPT_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
 const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? LiquidMaxPainToken_ABI_PROD : LiquidMaxPainToken_ABI_DEV;
 
-export default function Solidify() {
+interface SolidifyProps {
+  playAudio: () => void | Promise<void>;
+}
+
+export default function Solidify({ playAudio }: SolidifyProps) {
   const [selectedMaxPain, setSelectedMaxPain] = useState<Key | null>(null);
 
   const ONEHUNDRED_LQMPT = BigInt(100000000000000000000);
@@ -45,6 +49,7 @@ export default function Solidify() {
       setSelectedMaxPain(null);
       mutate();
       refetch();
+      playAudio()
     }
   }, [solidifyMaxPainConfirmed]);
 
@@ -70,7 +75,7 @@ export default function Solidify() {
   // Add this effect to handle auto-close
   useEffect(() => {
     if (solidifyMaxPainConfirmed && isModalOpen) {
-      const timer = setTimeout(() => setIsModalOpen(false), 3000);
+      const timer = setTimeout(() => setIsModalOpen(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [solidifyMaxPainConfirmed, isModalOpen]);

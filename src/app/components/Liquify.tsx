@@ -15,7 +15,12 @@ const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as
 const MAX_PAIN_address = process.env.NEXT_PUBLIC_MAX_PAIN_ADDRESS as `0x${string}`;
 const MAX_PAIN_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? MAX_PAIN_ABI_PROD : MAX_PAIN_ABI_DEV;
 
-export default function Liquify() {
+
+interface LiquifyProps {
+    playAudio: () => void | Promise<void>;
+}
+
+export default function Liquify({ playAudio }: LiquifyProps) {
     const [selectedMaxPain, setSelectedMaxPain] = useState<Key | null>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +54,7 @@ export default function Liquify() {
             setSelectedMaxPain(null);
             mutate();
             refetch();
+            playAudio()
         }
     }, [sendMaxPainConfirmed]);
 
@@ -60,7 +66,7 @@ export default function Liquify() {
 
     useEffect(() => {
         if (sendMaxPainConfirmed && isModalOpen) {
-            const timer = setTimeout(() => setIsModalOpen(false), 3000);
+            const timer = setTimeout(() => setIsModalOpen(false), 2000);
             return () => clearTimeout(timer);
         }
     }, [sendMaxPainConfirmed, isModalOpen]);

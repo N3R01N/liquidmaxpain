@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from "next/image";
 import Head from 'next/head';
 import { Button, Link } from "@heroui/react";
@@ -36,6 +36,26 @@ export default function Home() {
 
   const handleSwitchChain = () => {
     mutate({ chainId: desiredNetworkId });
+  };
+
+  // Sound playing logic
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const playSound = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      setIsPlaying(true);
+      audio.currentTime = 0;
+      audio.volume = 0.2;
+      await audio.play();
+    } catch (error) {
+      console.error('Audio playback failed:', error);
+    } finally {
+      setIsPlaying(false);
+    }
   };
 
   return (
@@ -83,8 +103,8 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
-        <Liquify />
-        <Solidify />
+        <Liquify playAudio={playSound} />
+        <Solidify playAudio={playSound} />
       </div>
 
       <div className='flex flex-col text-center text-sm mt-2'>
@@ -105,7 +125,7 @@ export default function Home() {
           unoptimized
         />
       </div>
-
+      <audio ref={audioRef} src="/Voicy_Max Payne.mp3" preload="auto" />
       <div className='flex flex-row gap-5 bg-neutral-900 p-3 pl-5 pr-5 md:pl-7 md:pr-7 rounded-xl'>
         <Link href={`https://etherscan.io/address/${LiquidMaxPain_address}`} >
           <Image
