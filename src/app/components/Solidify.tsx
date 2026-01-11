@@ -5,16 +5,13 @@ import { Button, Select, ListBox, Card } from "@heroui/react";
 import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useConnection } from "wagmi";
 import { useNFTs } from '../context/NFTContext';
 import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
-import LiquidMaxPainToken_ABI_DEV from "../ABI/dev/LiquidMaxPainToken_ABI.json";
-import LiquidMaxPainToken_ABI_PROD from "../ABI/prod/LiquidMaxPainToken_ABI.json";
 import type { Key } from "react-aria-components";
 import { MaxPainType } from '../context/Types';
 import TransactionModal from './TransactionModal';
 import { parseEther } from 'viem';
-import { parse } from 'path';
 
 const LQMPT_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
-const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? LiquidMaxPainToken_ABI_PROD : LiquidMaxPainToken_ABI_DEV;
+const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? require('../ABI/prod/LiquidMaxPainToken_ABI.json') : require('../ABI/dev/LiquidMaxPainToken_ABI.json');
 
 interface SolidifyProps {
   playAudio: () => void | Promise<void>;
@@ -36,7 +33,7 @@ export default function Solidify({ playAudio }: SolidifyProps) {
     address: LQMPT_address,
     abi: LiquidMaxPainToken_ABI,
     functionName: 'solidify',
-    args: [selectedMaxPain, ONEHUNDRED_LQMPT, address],
+    args: [selectedMaxPain as number, address as `0x${string}`],
     query: { enabled: !!selectedMaxPain && !!address },
   });
 
