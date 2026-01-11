@@ -37,7 +37,12 @@ const fetchMaxPainInWallet = async (address: Address, alchemyApiKey: string) => 
         return { balance: 0, ownedNfts: [] };
     }
 
-    const endpoint = `${alchemyNftEndpoint}/${alchemyApiKey}/getNFTsForOwner?owner=${address}&contractAddresses%5B%5D=${maxPainAddress}&withMetadata=false&pageSize=100`;
+    const endpoint = `${alchemyNftEndpoint}/${alchemyApiKey}/getNFTsForOwner` +
+        `?owner=${address}` +
+        `&contractAddresses%5B%5D=${maxPainAddress}` +
+        `&withMetadata=false` +
+        `&pageSize=100` +
+        `&refreshCache=true`;
 
     const response = await fetch(endpoint);
     if (!response.ok) {
