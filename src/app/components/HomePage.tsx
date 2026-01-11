@@ -134,7 +134,7 @@ export default function Home() {
             <Switch.Control>
               <Switch.Thumb />
             </Switch.Control>
-            <Label className="text-sm">swap ETH</Label>
+            <Label className="text-sm">swap for ETH</Label>
           </Switch>
         </div>
       </div>
@@ -175,28 +175,28 @@ export default function Home() {
       </div>
       <audio ref={audioRef} src="/Voicy_Max Payne.mp3" preload="auto" />
       <div className='flex flex-row gap-5 bg-neutral-900 p-3 pl-5 pr-5 md:pl-7 md:pr-7 rounded-xl'>
-        <Link href={`https://etherscan.io/address/${LiquidMaxPain_address}`} >
+        <Link href={`https://etherscan.io/address/${LiquidMaxPain_address}`} target="_blank">
           <Image
             src="/etherscan-logo-circle.svg"
             width={30}
             height={30}
             alt="etherscan"
           /></Link>
-        <Link href={`https://github.com/N3R01N/liquidmaxpain`} >
+        <Link href={`https://github.com/N3R01N/liquidmaxpain`} target="_blank">
           <Image
             src="/github.png"
             width={30}
             height={30}
             alt="github"
           /></Link>
-        <Link href={`https://opensea.io/collection/max-pain-and-frens-by-xcopy`} >
+        <Link href={`https://opensea.io/collection/max-pain-and-frens-by-xcopy`} target="_blank">
           <Image
             src="/opensea.png"
             width={30}
             height={30}
             alt="opensea"
           /></Link>
-        <Link href={`https://dexscreener.com/base/${LiquidMaxPain_address}`} >
+        <Link href={`https://dexscreener.com/ethereum/0x8ebec927154f4f09b76e6719894dfa60aca8fe8bbf8e6ada27435f6cd1519283`} target="_blank">
           <Image
             src="/dexscreener.png"
             width={30}
@@ -212,7 +212,7 @@ export default function Home() {
             alt="coingecko"
           /></Link>
           */}
-        <Link href={`https://app.uniswap.org/add/ETH/${LiquidMaxPain_address}/10000`}>
+        <Link href={`https://app.uniswap.org/swap?chain=mainnet&inputCurrency=NATIVE&outputCurrency=${LiquidMaxPain_address}`} target="_blank">
           <Image
             src="/uniswap.png"
             width={30}
