@@ -12,6 +12,9 @@ import Solidify from "./Solidify";
 import { useNFTs } from '../context/NFTContext';
 import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
 
+import LiquifyETH from "./LiquifyETH";
+import SolidifyETH from './SolidifyETH';
+
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
 
 const desiredNetworkId = 1;
@@ -128,6 +131,8 @@ export default function Home() {
       <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
         <Liquify playAudio={playSound} />
         <Solidify playAudio={playSound} />
+        <LiquifyETH playAudio={playSound} />
+        <SolidifyETH playAudio={playSound} />
       </div>
 
       <div className='flex flex-col text-center text-sm mt-2'>

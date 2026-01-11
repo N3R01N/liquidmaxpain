@@ -2,91 +2,91 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Select, ListBox, Card } from "@heroui/react";
-import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useConnection } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useSimulateContract, useConnection, useBalance } from "wagmi";
 import { useNFTs } from '../context/NFTContext';
-import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
-import LiquidMaxPainToken_ABI_DEV from "../ABI/dev/LiquidMaxPainToken_ABI.json";
-import LiquidMaxPainToken_ABI_PROD from "../ABI/prod/LiquidMaxPainToken_ABI.json";
+import { useLiquidMaxPainSwap } from '../context/LiquidMaxPainSwapContext';
 import type { Key } from "react-aria-components";
 import { MaxPainType } from '../context/Types';
 import TransactionModal from './TransactionModal';
-import { parseEther } from 'viem';
-import { parse } from 'path';
+import { formatEther } from 'viem';
 
-const LQMPT_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
-const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? LiquidMaxPainToken_ABI_PROD : LiquidMaxPainToken_ABI_DEV;
+const LiquidMaxpainSwap_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_SWAP_ADDRESS as `0x${string}`;
+const LIQUID_MAX_PAIN_SWAP_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? require('../ABI/prod/LiquidMaxPainSwap_ABI.json') : require('../ABI/dev/LiquidMaxPainSwap_ABI.json');
 
 interface SolidifyProps {
   playAudio: () => void | Promise<void>;
 }
 
-export default function Solidify({ playAudio }: SolidifyProps) {
+export default function SolidifyETH({ playAudio }: SolidifyProps) {
   const [selectedMaxPain, setSelectedMaxPain] = useState<Key | null>(null);
-
-  const ONEHUNDRED_LQMPT = parseEther("100");
 
   // Wagmi hooks
   const { address } = useConnection();
   const { balanceOfLiquidMaxPain, ownedNftsByLiquidMaxPain, mutate } = useNFTs();
-  const { balance: lqmptBalance, refetch } = useLiquidMaxPainToken();
+  const { buyPrice, refetch } = useLiquidMaxPainSwap();
+
+  const { data } = useBalance({
+    address: address,
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: simulateSolidifyMaxPain, isLoading: isSimulating, error: simulateError } = useSimulateContract({
-    address: LQMPT_address,
-    abi: LiquidMaxPainToken_ABI,
-    functionName: 'solidify',
-    args: [selectedMaxPain, ONEHUNDRED_LQMPT, address],
-    query: { enabled: !!selectedMaxPain && !!address },
+  const { data: simulateBuyMaxPain, isLoading: isSimulating, error: simulateError } = useSimulateContract({
+    address: LiquidMaxpainSwap_address,
+    abi: LIQUID_MAX_PAIN_SWAP_ABI,
+    functionName: 'swapEthForMaxPain',
+    args: [address as `0x${string}`, selectedMaxPain as Key],
+    account: address,
+    value: BigInt(buyPrice as number),
+    query: { enabled: !!selectedMaxPain && !!address && !!buyPrice && data?.value as bigint >= buyPrice },
   });
 
-  const { mutate: solidifyMaxPain, data: solidifyMaxPainHash, isPending: isWritePending } = useWriteContract();
+  const { mutate: buyMaxPain, data: buyMaxPainHash, isPending: isBuyPending } = useWriteContract();
 
-  const { isSuccess: solidifyMaxPainConfirmed, isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash: solidifyMaxPainHash,
+  const { isSuccess: buyMaxPainConfirmed, isLoading: isConfirming } = useWaitForTransactionReceipt({
+    hash: buyMaxPainHash,
   });
 
   useEffect(() => {
-    if (solidifyMaxPainConfirmed) {
+    if (buyMaxPainConfirmed) {
       setSelectedMaxPain(null);
       mutate();
       refetch();
       playAudio()
     }
-  }, [solidifyMaxPainConfirmed]);
+  }, [buyMaxPainConfirmed]);
 
   useEffect(() => {
-    if (solidifyMaxPainHash && isConfirming) {
+    if (buyMaxPainHash && isConfirming) {
       setIsModalOpen(true);
     }
-  }, [solidifyMaxPainHash, isConfirming]);
-
-  // Handle liquify button click
-  const handleSolidify = () => {
-    if (simulateSolidifyMaxPain?.request) {
-      solidifyMaxPain(simulateSolidifyMaxPain?.request);
-    }
-  };
+  }, [buyMaxPainHash, isConfirming]);
 
   useEffect(() => {
     if (simulateError) {
-      console.error("Simulation failed:", simulateError);
+      console.error("Buy Simulation failed:", simulateError);
     }
   }, [simulateError]);
 
   // Add this effect to handle auto-close
   useEffect(() => {
-    if (solidifyMaxPainConfirmed && isModalOpen) {
+    if (buyMaxPainConfirmed && isModalOpen) {
       const timer = setTimeout(() => setIsModalOpen(false), 2000);
       return () => clearTimeout(timer);
     }
-  }, [solidifyMaxPainConfirmed, isModalOpen]);
+  }, [buyMaxPainConfirmed, isModalOpen]);
+  // Handle buy button click
+  const handleBuy = () => {
+    if (simulateBuyMaxPain?.request) {
+      buyMaxPain(simulateBuyMaxPain?.request);
+    }
+  };
 
   return (
     <>
       <Card className='text-[#75ffba] bg-neutral-900 p-3 w-full md:w-auto border border-stone-600'>
         <Card.Header className="items-center justify-center text-center border-b border-stone-600 pb-3">
-          <h3 className="text-xl md:text-2xl font-bold">Solidify Max Pain</h3>
+          <h3 className="text-xl md:text-2xl font-bold">Buy Max Pain</h3>
         </Card.Header>
         <Card.Content className="items-center justify-center py-5">
           <div className='flex flex-col w-64 items-center justify-center gap-4'>
@@ -121,11 +121,11 @@ export default function Solidify({ playAudio }: SolidifyProps) {
 
             <Button
               variant="primary"
-              isDisabled={balanceOfLiquidMaxPain == 0 || lqmptBalance < ONEHUNDRED_LQMPT || !selectedMaxPain || isSimulating}
-              onPress={handleSolidify}
+              isDisabled={balanceOfLiquidMaxPain == 0 || data?.value as bigint < BigInt(buyPrice as number) || !selectedMaxPain || isSimulating}
+              onPress={handleBuy}
               className="mt-2 w-full bg-[#fc017d] text-black font-bold hover:bg-[#e0016f] active:bg-[#c80161] transition-all duration-200"
             >
-              Solidify
+              Buy
             </Button>
           </div>
         </Card.Content>
@@ -133,7 +133,7 @@ export default function Solidify({ playAudio }: SolidifyProps) {
           <div className="flex justify-between w-full max-w-xs">
             <span className="text-gray-400 text-sm font-medium">You give:</span>
             <span className="font-mono text-[#75ffba] text-sm">
-              {selectedMaxPain ? `100 LQMPT` : '—'}
+              {selectedMaxPain ? `${buyPrice ? formatEther(BigInt(buyPrice)) : '0'} ETH` : '—'}
             </span>
           </div>
           <div className="flex justify-between w-full max-w-xs">
@@ -146,11 +146,11 @@ export default function Solidify({ playAudio }: SolidifyProps) {
       </Card>
       <TransactionModal
         isOpen={isModalOpen}
-        hash={solidifyMaxPainHash}
-        isConfirming={isWritePending || isConfirming}
-        isConfirmed={solidifyMaxPainConfirmed}
-        action="Solidifying Max Pain..."
-        image={{ src: "/solidify_animation.gif", alt: "Solidify MAX PAIN" }}
+        hash={buyMaxPainHash}
+        isConfirming={isBuyPending || isConfirming}
+        isConfirmed={buyMaxPainConfirmed}
+        action="Buying Max Pain..."
+        image={{ src: "/solidify_animation.gif", alt: "Buy MAX PAIN" }}
       />
     </>
   );

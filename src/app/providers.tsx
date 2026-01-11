@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
 import { NFTProvider } from './context/NFTContext';
 import { LiquidMaxPainTokenProvider } from './context/LiquidMaxPainTokenContext';
+import { LiquidMaxPainSwapProvider } from './context/LiquidMaxPainSwapContext';
 import type { ReactNode } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { useConfig } from './hooks/useConfig';
@@ -38,9 +39,11 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
             {mounted ? (
               <NFTProvider>
                 <LiquidMaxPainTokenProvider>
-                  <main className="dark text-foreground bg-background">
-                    {children}
-                  </main>
+                  <LiquidMaxPainSwapProvider>
+                    <main className="dark text-foreground bg-background">
+                      {children}
+                    </main>
+                  </LiquidMaxPainSwapProvider>
                 </LiquidMaxPainTokenProvider>
               </NFTProvider>
             ) : (
