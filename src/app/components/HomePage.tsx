@@ -2,11 +2,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Image from "next/image";
 import Head from 'next/head';
-import { Button, Link } from "@heroui/react";
+import { Button, Link, Label, Switch } from "@heroui/react";
 import '@rainbow-me/rainbowkit/styles.css';
 import { useSwitchChain, useConnection } from "wagmi";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { createWagmiConfig } from '../wagmi.config';
 import Liquify from "./Liquify";
 import Solidify from "./Solidify";
 import { useNFTs } from '../context/NFTContext';
@@ -21,6 +20,7 @@ const desiredNetworkId = 1;
 
 export default function Home() {
   const [isClientSide, setIsClientSide] = useState(false);
+  const [isETH, setIsETH] = React.useState(false);
   const { balanceOfLiquidMaxPain } = useNFTs();
   const { balance: lqmptBalance } = useLiquidMaxPainToken();
   const { isConnected, chain } = useConnection();
@@ -128,12 +128,32 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
-        <Liquify playAudio={playSound} />
-        <Solidify playAudio={playSound} />
-        <LiquifyETH playAudio={playSound} />
-        <SolidifyETH playAudio={playSound} />
+      <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
+        <div className='border-b-3 border-stone-600 pb-1'>
+          <Switch isSelected={isETH} onChange={setIsETH}>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            <Label className="text-sm">swap ETH</Label>
+          </Switch>
+        </div>
       </div>
+
+      {isETH ?
+        (
+          <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
+            <LiquifyETH playAudio={playSound} />
+            <SolidifyETH playAudio={playSound} />
+          </div>
+        )
+        :
+        (
+          <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
+            <Liquify playAudio={playSound} />
+            <Solidify playAudio={playSound} />
+          </div>
+        )
+      }
 
       <div className='flex flex-col text-center text-sm mt-2'>
         <p><Link href={`https://x.com/XCOPYART`} className="text-[#75ffba] text-sm">XCOPY</Link> is <u>not</u> affiliated with $LiquidMaxPain.</p>
