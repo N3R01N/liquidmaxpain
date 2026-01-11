@@ -33,7 +33,7 @@ export default function Solidify({ playAudio }: SolidifyProps) {
     address: LQMPT_address,
     abi: LiquidMaxPainToken_ABI,
     functionName: 'solidify',
-    args: [selectedMaxPain as number, ONEHUNDRED_LQMPT, address as `0x${string}`],
+    args: [selectedMaxPain as number, address as `0x${string}`],
     query: { enabled: !!selectedMaxPain && !!address },
   });
 
