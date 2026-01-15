@@ -5,6 +5,7 @@ import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
 import { NFTProvider } from './context/NFTContext';
+import { OpenSeaProvider } from './context/OpenSeaContext';
 import { LiquidMaxPainTokenProvider } from './context/LiquidMaxPainTokenContext';
 import { LiquidMaxPainSwapProvider } from './context/LiquidMaxPainSwapContext';
 import type { ReactNode } from 'react';
@@ -38,13 +39,15 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
           <RainbowKitProvider>
             {mounted ? (
               <NFTProvider>
-                <LiquidMaxPainTokenProvider>
-                  <LiquidMaxPainSwapProvider>
-                    <main className="dark text-foreground bg-background">
-                      {children}
-                    </main>
-                  </LiquidMaxPainSwapProvider>
-                </LiquidMaxPainTokenProvider>
+                <OpenSeaProvider>
+                  <LiquidMaxPainTokenProvider>
+                    <LiquidMaxPainSwapProvider>
+                      <main className="dark text-foreground bg-background">
+                        {children}
+                      </main>
+                    </LiquidMaxPainSwapProvider>
+                  </LiquidMaxPainTokenProvider>
+                </OpenSeaProvider>
               </NFTProvider>
             ) : (
               <div className="min-h-screen bg-black" /> // Prevents flash

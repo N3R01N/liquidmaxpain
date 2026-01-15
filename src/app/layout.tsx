@@ -17,13 +17,17 @@ const silk = Silkscreen({
 export const metadata: Metadata = {
     title: 'LiquidMaxPain',
     description: 'liquify your Max Pain NFTs into LiquidMaxPainTokens (LQMPT) and solidify them back anytime!',
+    icons: {
+        icon: '/favicon.svg',
+    },
 };
 
 const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
-        // ? https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
-        // ? https://react.dev/reference/react-dom/client/hydrateRoot#suppressing-unavoidable-hydration-mismatch-errors
         <html suppressHydrationWarning lang='en'>
+            <link rel="icon" href="/favicon.ico" sizes="16x16" />
+            <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
+            <link rel="apple-touch-icon" href="/favicon.jpg" sizes="180x180" />
             <body className={`${silk.className} bg-background text-foreground antialiased`}>
                 <Providers>{children}</Providers>
             </body>

@@ -8,11 +8,13 @@ import { useSwitchChain, useConnection } from "wagmi";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Liquify from "./Liquify";
 import Solidify from "./Solidify";
-import { useNFTs } from '../context/NFTContext';
-import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
-
 import LiquifyETH from "./LiquifyETH";
 import SolidifyETH from './SolidifyETH';
+import { useNFTs } from '../context/NFTContext';
+import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
+import { useLiquidMaxPainSwap } from '../context/LiquidMaxPainSwapContext';
+import { formatEther } from 'viem';
+import { useOpenSea } from '../context/OpenSeaContext';
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
 
@@ -24,6 +26,9 @@ export default function Home() {
   const { balanceOfLiquidMaxPain } = useNFTs();
   const { balance: lqmptBalance } = useLiquidMaxPainToken();
   const { isConnected, chain } = useConnection();
+
+  const { buyPrice, sellPrice, refetch } = useLiquidMaxPainSwap();
+  const { data } = useOpenSea();
 
   const { mutate } = useSwitchChain();
 
@@ -60,6 +65,8 @@ export default function Home() {
       setIsPlaying(false);
     }
   };
+
+  console.log("Home component render: data from OpenSeaContext:", data);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-6 text-[#75ffba] tracking-tight">
@@ -139,6 +146,19 @@ export default function Home() {
         </div>
       </div>
 
+      <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
+        <div className='border-b-3 border-stone-600 pb-1'>
+          <h2 className="text-lg md:text-xl">Current Prices</h2>
+        </div>
+        <div className='mt-2'>
+          <p className="text-sm">Buy Price: {buyPrice ? Number(formatEther(BigInt(buyPrice))).toFixed(4) : '0'} ETH</p>
+          <p className="text-sm">Sell Price: {sellPrice ? Number(formatEther(BigInt(sellPrice))).toFixed(4) : '0'} ETH</p>
+        </div>
+        <div className='mt-2'>
+          <p className="text-sm">OS Buy Price: {data?.price ? formatEther(BigInt(data.price)) : '0'} ETH</p>
+        </div>
+      </div>
+
       {isETH ?
         (
           <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
@@ -156,22 +176,24 @@ export default function Home() {
       }
 
       <div className='flex flex-col text-center text-sm mt-2'>
-        <p><Link href={`https://x.com/XCOPYART`} className="text-[#75ffba] text-sm">XCOPY</Link> is <u>not</u> affiliated with $LiquidMaxPain.</p>
+        <p><Link href={`https://x.com/XCOPYART`} target="_blank" className="text-[#75ffba] text-sm">XCOPY</Link> is <u>not</u> affiliated with $LiquidMaxPain.</p>
         <p>This is a community-run project.</p>
       </div>
       <div className='flex flex-col text-center text-sm mt-2'>
-        <p>Also check out our friends at <Link href={`https://mutatioflies.com/`} className="text-[#72e536] text-sm">mutatioflies.com</Link></p>
+        <p>Also check out our friends at <Link href={`https://mutatioflies.com/`} target="_blank" className="text-[#72e536] text-sm">mutatioflies.com</Link></p>
       </div>
       <div>
-        <Image
-          src="/MAX_PAIN.gif"
-          width={225}
-          height={225}
-          className='m-3 mb-3'
-          alt="MAX PAIN"
-          priority
-          unoptimized
-        />
+        <Link href={`https://xcopy.art/works/max-pain`} target="_blank">
+          <Image
+            src="/MAX_PAIN.gif"
+            width={225}
+            height={225}
+            className='m-3 mb-3'
+            alt="MAX PAIN"
+            priority
+            unoptimized
+          />
+        </Link>
       </div>
       <audio ref={audioRef} src="/Voicy_Max Payne.mp3" preload="auto" />
       <div className='flex flex-row gap-5 bg-neutral-900 p-3 pl-5 pr-5 md:pl-7 md:pr-7 rounded-xl'>
@@ -196,22 +218,13 @@ export default function Home() {
             height={30}
             alt="opensea"
           /></Link>
-        <Link href={`https://dexscreener.com/ethereum/0x8ebec927154f4f09b76e6719894dfa60aca8fe8bbf8e6ada27435f6cd1519283`} target="_blank">
+        <Link href={`https://www.geckoterminal.com/eth/pools/0x8ebec927154f4f09b76e6719894dfa60aca8fe8bbf8e6ada27435f6cd1519283`} target="_blank">
           <Image
-            src="/dexscreener.png"
+            src="/gecko_terminal.png"
             width={30}
             height={30}
-            alt="dexscreener"
+            alt="geckoterminal"
           /></Link>
-        {/** for now disabled
-        <Link href={`https://www.coingecko.com/de/munze/mutatio-flies`} >
-          <Image
-            src="/coingecko.png"
-            width={30}
-            height={30}
-            alt="coingecko"
-          /></Link>
-          */}
         <Link href={`https://app.uniswap.org/swap?chain=mainnet&inputCurrency=NATIVE&outputCurrency=${LiquidMaxPain_address}`} target="_blank">
           <Image
             src="/uniswap.png"
@@ -219,7 +232,13 @@ export default function Home() {
             height={30}
             alt="uniswap"
           /></Link>
-
+        <Link href={`https://xcopy.art/`} target="_blank">
+          <Image
+            src="/xcopy_logo.png"
+            width={30}
+            height={30}
+            alt="XCopy"
+          /></Link>
       </div>
     </main>
   );

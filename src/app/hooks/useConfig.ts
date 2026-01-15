@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 export function useConfig() {
-    const [appConfig, setAppConfig] = useState<{ projectId: string, apiKey: string } | null>(null);
+    const [appConfig, setAppConfig] = useState<{ projectId: string } | null>(null);
 
     useEffect(() => {
         fetch('/api/config', {  // ✅ Remove the /app prefix

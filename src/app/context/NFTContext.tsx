@@ -4,8 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useConnection } from 'wagmi';
 import { MaxPainType } from './Types';
 import type { ReactNode } from 'react';
-import { Address } from 'viem';
-import { useConfig } from '../hooks/useConfig';
 
 interface NFTContextType {
     balanceOfConnectedAddress: number;
@@ -28,36 +26,12 @@ const defaultContext = {
 }
 const NFTContext = createContext<NFTContextType>(defaultContext);
 
-const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
-const alchemyNftEndpoint = process.env.NEXT_PUBLIC_ALCHEMY_NFT_URL;
-const maxPainAddress = process.env.NEXT_PUBLIC_MAX_PAIN_ADDRESS;
-
-const fetchMaxPainInWallet = async (address: Address, alchemyApiKey: string) => {
-    if (!address) {
-        return { balance: 0, ownedNfts: [] };
+const fetchNFTsFromAPI = async (address: string) => {
+    const res = await fetch(`/api/nft?address=${address}`);
+    if (!res.ok) {
+        throw new Error('Failed to fetch NFTs');
     }
-
-    const endpoint = `${alchemyNftEndpoint}/${alchemyApiKey}/getNFTsForOwner` +
-        `?owner=${address}` +
-        `&contractAddresses%5B%5D=${maxPainAddress}` +
-        `&withMetadata=false` +
-        `&pageSize=100` +
-        `&refreshCache=true`;
-
-    const response = await fetch(endpoint);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    return {
-        balance: data.totalCount || 0,
-        ownedNfts: data.ownedNfts?.map((nft: MaxPainType) => ({
-            tokenId: nft.tokenId,
-            name: `MAX PAIN #${Number(nft.tokenId) % 10 ** 4}/7394`
-        })) || []
-    };
+    return res.json();
 };
 
 export function NFTProvider({ children }: { children: ReactNode }) {
@@ -71,38 +45,24 @@ export function NFTProvider({ children }: { children: ReactNode }) {
         setReady(true);
     }, []);
 
-    const appConfig = useConfig();
-
     // ✅ useQuery hooks are ALWAYS called, but conditionally enabled
-    const { data: data1, isLoading: isLoading1, error: error1 } = useQuery({
+    const { data: data, isLoading: isLoading, error: error } = useQuery({
         queryKey: ['nfts', address],
-        queryFn: () => fetchMaxPainInWallet(address!, appConfig?.apiKey!),
-        enabled: !!address && ready && !!appConfig?.apiKey,
+        queryFn: () => fetchNFTsFromAPI(address!),
+        enabled: !!address && ready,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
-
-    const { data: data2, isLoading: isLoading2, error: error2 } = useQuery({
-        queryKey: ['nfts', LiquidMaxPain_address],
-        queryFn: () => fetchMaxPainInWallet(LiquidMaxPain_address!, appConfig?.apiKey!),
-        enabled: !!LiquidMaxPain_address && ready && !!appConfig?.apiKey,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-    });
-
-    // ✅ NO early returns after hooks - always render the provider
-    const isLoading = isLoading1 || isLoading2;
-    const error = error1 || error2;
 
     const mutate = useCallback(() => {
         queryClient.refetchQueries({ queryKey: ['nfts'] });
     }, [queryClient]);
 
     let value: NFTContextType = {
-        balanceOfConnectedAddress: data1?.balance || 0,
-        ownedNftsByConnectedAddress: data1?.ownedNfts || [],
-        balanceOfLiquidMaxPain: data2?.balance || 0,
-        ownedNftsByLiquidMaxPain: data2?.ownedNfts || [],
+        balanceOfConnectedAddress: data?.user?.balance || 0,
+        ownedNftsByConnectedAddress: data?.user?.ownedNfts || [],
+        balanceOfLiquidMaxPain: data?.contract?.balance || 0,
+        ownedNftsByLiquidMaxPain: data?.contract?.ownedNfts || [],
         isLoading,
         error,
         mutate,
