@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { Silkscreen } from 'next/font/google';
 import { Providers } from "./providers";
+import { Analytics } from "@vercel/analytics/next"
 
 import '@/app/globals.css';
 
@@ -29,6 +30,7 @@ const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
             <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
             <link rel="apple-touch-icon" href="/favicon.jpg" sizes="180x180" />
             <body className={`${silk.className} bg-background text-foreground antialiased`}>
+                <Analytics />
                 <Providers>{children}</Providers>
             </body>
         </html>

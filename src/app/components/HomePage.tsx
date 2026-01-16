@@ -66,8 +66,6 @@ export default function Home() {
     }
   };
 
-  console.log("Home component render: data from OpenSeaContext:", data);
-
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-6 text-[#75ffba] tracking-tight">
       <Head>
@@ -87,7 +85,7 @@ export default function Home() {
 
         {balanceOfLiquidMaxPain && (
           <h2 className='mt-4 text-sm sm:text-base'>
-            {balanceOfLiquidMaxPain} / 7394 liquified
+            {balanceOfLiquidMaxPain} / 4849 liquified
           </h2>
         )}
       </div>

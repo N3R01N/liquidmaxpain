@@ -4,7 +4,7 @@ const OPENSEA_COLLECTION_SLUG = 'max-pain-and-frens-by-xcopy';
 const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY!;
 
 // ⚠️ Must be the address that will actually call Seaport on-chain for testing liquidmaxpain.brn.eth
-const FULFILLER_ADDRESS = '0x6f2844f39ee8a109f73373b18027db8c4a278f06';
+const FULFILLER_ADDRESS = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ARBITRAGE_ADDRESS!;
 
 // Seaport v1.5 (Ethereum mainnet)
 const SEAPORT_ADDRESS = '0x0000000000000068f116a894984e2db1123eb395';
@@ -86,36 +86,14 @@ export async function GET() {
 
         const fulfillmentData = await fulfillmentRes.json();
         const inputData = fulfillmentData?.fulfillment_data?.transaction?.input_data;
-        const consideration = inputData.advancedOrder.parameters.consideration[0];
-        /*
-                const orderData = {
-                    considerationToken: consideration.token,
-                    considerationIdentifier: consideration.identifierOrCriteria,
-                    considerationAmount: consideration.startAmount,
-                    offerer: inputData.advancedOrder.parameters.offerer,
-                    zone: inputData.advancedOrder.parameters.zone,
-                    offerToken: consideration.token,
-                    offerIdentifier:
-                        offerAmount:
-                    basicOrderType:
-                        startTime:
-                    endTime:
-                        zoneHash:
-                    salt:
-                        offererConduitKey:
-                    fulfillerConduitKey:
-                        totalOriginalAdditionalRecipients:
-                    additionalRecipients:
-                        signature:
-                }
-        */
         /* ------------------------------------------------------------
            3. Return combined response to frontend
         ------------------------------------------------------------- */
         return NextResponse.json({
             price: Number(price),
-            orderHash,
-            inputData: fulfillmentData.fulfillment_data.transaction.input_data,
+            advanceOrder: inputData.advancedOrder,
+            criteriaResolvers: inputData.criteriaResolvers,
+            fulfillerConduitKey: inputData.fulfillerConduitKey,
         });
     } catch (err) {
         console.error('OpenSea pipeline failed:', err);
@@ -125,4 +103,3 @@ export async function GET() {
         );
     }
 }
-

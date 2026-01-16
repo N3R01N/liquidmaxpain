@@ -15,8 +15,6 @@ async function fetchNFTs(owner: string) {
         `&pageSize=100` +
         `&refreshCache=true`;
 
-    console.log("Fetching NFTs from:", endpoint);
-
     const res = await fetch(endpoint, { cache: 'no-store' });
     if (!res.ok) throw new Error('Alchemy error');
 
