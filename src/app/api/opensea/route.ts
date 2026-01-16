@@ -7,7 +7,7 @@ const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY!;
 const FULFILLER_ADDRESS = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ARBITRAGE_ADDRESS!;
 
 // Seaport v1.5 (Ethereum mainnet)
-const SEAPORT_ADDRESS = '0x0000000000000068f116a894984e2db1123eb395';
+const SEAPORT_ADDRESS = process.env.NEXT_PUBLIC_SEAPORT_ADDRESS!;
 
 export async function GET() {
     try {
