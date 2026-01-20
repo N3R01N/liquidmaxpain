@@ -1,39 +1,72 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    useCallback,
+} from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { useConfig } from '../hooks/useConfig';
 
-interface OpenSeaListing {
-    price: number;
-    orderHash: string;
-    inputData: any;
-}
+/* ------------------------------------------------------------
+   Types
+------------------------------------------------------------- */
+
+type BasicOrderResponse = {
+    type: 'basic';
+    chain: string;
+    value: string;
+    basicOrderParameters: any;
+};
+
+type AdvancedOrderResponse = {
+    type: 'advanced';
+    chain: string;
+    value: string;
+    advancedOrder: any;
+    criteriaResolvers: any[];
+    fulfillerConduitKey: string;
+};
+
+type OpenSeaListing = BasicOrderResponse | AdvancedOrderResponse;
 
 interface OpenSeaContextType {
-    data: OpenSeaListing | null;
+    osData: OpenSeaListing | null;
     isLoading: boolean;
     error: boolean | unknown;
     mutate: () => void;
 }
 
+/* ------------------------------------------------------------
+   Context
+------------------------------------------------------------- */
+
 const defaultContext: OpenSeaContextType = {
-    data: null,
+    osData: null,
     isLoading: true,
     error: false,
-    mutate: () => { }
+    mutate: () => { },
 };
 
 const OpenSeaContext = createContext<OpenSeaContextType>(defaultContext);
 
-const fetchBestListing = async () => {
-    const res = await fetch(`/api/opensea`);
+/* ------------------------------------------------------------
+   Fetcher
+------------------------------------------------------------- */
+
+const fetchBestListing = async (): Promise<OpenSeaListing> => {
+    const res = await fetch('/api/opensea');
     if (!res.ok) {
         throw new Error('Failed to fetch OpenSea listing');
     }
     return res.json();
 };
+
+/* ------------------------------------------------------------
+   Provider
+------------------------------------------------------------- */
 
 export function OpenSeaProvider({ children }: { children: ReactNode }) {
     const [ready, setReady] = useState(false);
@@ -43,9 +76,9 @@ export function OpenSeaProvider({ children }: { children: ReactNode }) {
         setReady(true);
     }, []);
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, error } = useQuery<OpenSeaListing>({
         queryKey: ['opensea-best-listing'],
-        queryFn: () => fetchBestListing(),
+        queryFn: fetchBestListing,
         enabled: ready,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -58,7 +91,7 @@ export function OpenSeaProvider({ children }: { children: ReactNode }) {
     }, [queryClient]);
 
     const value: OpenSeaContextType = {
-        data: data ?? null,
+        osData: data ?? null,
         isLoading,
         error,
         mutate,
@@ -70,6 +103,10 @@ export function OpenSeaProvider({ children }: { children: ReactNode }) {
         </OpenSeaContext.Provider>
     );
 }
+
+/* ------------------------------------------------------------
+   Hook
+------------------------------------------------------------- */
 
 export const useOpenSea = () => {
     const context = useContext(OpenSeaContext);

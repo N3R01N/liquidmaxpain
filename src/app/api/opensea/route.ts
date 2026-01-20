@@ -1,18 +1,14 @@
 import { NextResponse } from 'next/server';
 
-const OPENSEA_COLLECTION_SLUG = 'max-pain-and-frens-by-xcopy';
+const OPENSEA_COLLECTION_SLUG = process.env.NEXT_PUBLIC_OPENSEA_COLLECTION_SLUG!;
 const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY!;
-
-// ⚠️ Must be the address that will actually call Seaport on-chain for testing liquidmaxpain.brn.eth
 const FULFILLER_ADDRESS = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ARBITRAGE_ADDRESS!;
-
-// Seaport v1.5 (Ethereum mainnet)
 const SEAPORT_ADDRESS = process.env.NEXT_PUBLIC_SEAPORT_ADDRESS!;
 
 export async function GET() {
     try {
         /* ------------------------------------------------------------
-           1. Fetch best listing from collection
+           1. Fetch best listing
         ------------------------------------------------------------- */
         const listingsRes = await fetch(
             `https://api.opensea.io/api/v2/listings/collection/${OPENSEA_COLLECTION_SLUG}/best`,
@@ -36,21 +32,18 @@ export async function GET() {
             return NextResponse.json({ error: 'No listings found' }, { status: 404 });
         }
 
-        const price = bestListing.price?.current?.value;
-        const orderHash = bestListing.order_hash;
+        const { order_hash, chain, price, protocol_data } = bestListing;
+        const consideration = protocol_data?.parameters?.consideration?.[0];
 
-        const protocolParams = bestListing?.protocol_data?.parameters;
-        const considerationreq = protocolParams?.consideration?.[0];
-
-        if (!price || !orderHash || !considerationreq) {
+        if (!order_hash || !chain || !price || !consideration) {
             return NextResponse.json(
-                { error: 'Incomplete listing data from OpenSea' },
+                { error: 'Incomplete listing data' },
                 { status: 400 }
             );
         }
 
         /* ------------------------------------------------------------
-           2. Call fulfillment_data endpoint
+           2. Fetch fulfillment data
         ------------------------------------------------------------- */
         const fulfillmentRes = await fetch(
             'https://api.opensea.io/api/v2/listings/fulfillment_data',
@@ -63,16 +56,16 @@ export async function GET() {
                 },
                 body: JSON.stringify({
                     listing: {
-                        hash: orderHash,
-                        chain: 'ethereum',
+                        hash: order_hash,
+                        chain,
                         protocol_address: SEAPORT_ADDRESS,
                     },
                     fulfiller: {
                         address: FULFILLER_ADDRESS,
                     },
                     consideration: {
-                        asset_contract_address: considerationreq.token,
-                        token_id: considerationreq.identifierOrCriteria,
+                        asset_contract_address: consideration.token,
+                        token_id: consideration.identifierOrCriteria,
                     },
                     include_optional_creator_fees: false,
                 }),
@@ -85,14 +78,44 @@ export async function GET() {
         }
 
         const fulfillmentData = await fulfillmentRes.json();
-        const inputData = fulfillmentData?.fulfillment_data?.transaction?.input_data;
+        const inputData =
+            fulfillmentData?.fulfillment_data?.transaction?.input_data;
+
+        if (!inputData) {
+            throw new Error('Missing fulfillment input_data');
+        }
+
         /* ------------------------------------------------------------
-           3. Return combined response to frontend
+           3. Payload-based order detection
         ------------------------------------------------------------- */
+        const hasBasic = !!inputData.parameters;
+        const hasAdvanced = !!inputData.advancedOrder;
+
+        if (hasBasic === hasAdvanced) {
+            throw new Error(
+                'Ambiguous fulfillment payload: cannot determine order type'
+            );
+        }
+
+        /* ------------------------------------------------------------
+           4. Return discriminated execution payload
+        ------------------------------------------------------------- */
+        if (hasBasic) {
+            return NextResponse.json({
+                type: 'basic',
+                chain,
+                value: price.current.value,
+                basicOrderParameters: inputData.parameters,
+            });
+        }
+
+        // advanced
         return NextResponse.json({
-            price: Number(price),
-            advanceOrder: inputData.advancedOrder,
-            criteriaResolvers: inputData.criteriaResolvers,
+            type: 'advanced',
+            chain,
+            value: price.current.value,
+            advancedOrder: inputData.advancedOrder,
+            criteriaResolvers: inputData.criteriaResolvers ?? [],
             fulfillerConduitKey: inputData.fulfillerConduitKey,
         });
     } catch (err) {

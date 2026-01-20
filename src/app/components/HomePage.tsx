@@ -10,11 +10,10 @@ import Liquify from "./Liquify";
 import Solidify from "./Solidify";
 import LiquifyETH from "./LiquifyETH";
 import SolidifyETH from './SolidifyETH';
+import Arbitrage from './Arbitrage';
 import { useNFTs } from '../context/NFTContext';
 import { useLiquidMaxPainToken } from '../context/LiquidMaxPainTokenContext';
-import { useLiquidMaxPainSwap } from '../context/LiquidMaxPainSwapContext';
-import { formatEther } from 'viem';
-import { useOpenSea } from '../context/OpenSeaContext';
+
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
 
@@ -26,9 +25,6 @@ export default function Home() {
   const { balanceOfLiquidMaxPain } = useNFTs();
   const { balance: lqmptBalance } = useLiquidMaxPainToken();
   const { isConnected, chain } = useConnection();
-
-  const { buyPrice, sellPrice, refetch } = useLiquidMaxPainSwap();
-  const { data } = useOpenSea();
 
   const { mutate } = useSwitchChain();
 
@@ -89,7 +85,7 @@ export default function Home() {
           </h2>
         )}
       </div>
-
+      <Arbitrage />
       <div className='my-4 sm:my-6 w-full max-w-sm mx-auto px-4'>
         {chain?.id !== desiredNetworkId && isConnected ? (
           <Button
@@ -144,18 +140,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
-        <div className='border-b-3 border-stone-600 pb-1'>
-          <h2 className="text-lg md:text-xl">Current Prices</h2>
-        </div>
-        <div className='mt-2'>
-          <p className="text-sm">Buy Price: {buyPrice ? Number(formatEther(BigInt(buyPrice))).toFixed(4) : '0'} ETH</p>
-          <p className="text-sm">Sell Price: {sellPrice ? Number(formatEther(BigInt(sellPrice))).toFixed(4) : '0'} ETH</p>
-        </div>
-        <div className='mt-2'>
-          <p className="text-sm">OS Buy Price: {data?.price ? formatEther(BigInt(data.price)) : '0'} ETH</p>
-        </div>
-      </div>
+
 
       {isETH ?
         (
