@@ -28,9 +28,7 @@ const FulfillmentType = {
 
 export default function Arbitrage() {
     const { address } = useConnection();
-    const { buyPrice } = useLiquidMaxPainSwap();
-    const sellPrice = 600000000000000;
-    //TODO const { buyPrice, sellPrice } = useLiquidMaxPainSwap();
+    const { buyPrice, sellPrice } = useLiquidMaxPainSwap();
     const { osData } = useOpenSea();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
