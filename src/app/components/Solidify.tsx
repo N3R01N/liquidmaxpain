@@ -136,7 +136,7 @@ export default function Solidify({ playAudio }: SolidifyProps) {
           <div className="flex justify-between w-full max-w-xs">
             <span className="text-gray-400 text-sm font-medium">You get:</span>
             <span className="font-mono text-[#75ffba] text-sm">
-              {selectedMaxPain ? `MAX PAIN #${selectedMaxPain}` : '—'}
+              {selectedMaxPain ? `MAX PAIN #${Number(selectedMaxPain) % 10 ** 4}` : '—'}
             </span>
           </div>
         </Card.Footer>

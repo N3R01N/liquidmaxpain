@@ -21,7 +21,7 @@ const desiredNetworkId = 1;
 
 export default function Home() {
   const [isClientSide, setIsClientSide] = useState(false);
-  const [isETH, setIsETH] = React.useState(false);
+  const [isLQMPT, setIsLQMPT] = React.useState(false);
   const { balanceOfLiquidMaxPain } = useNFTs();
   const { balance: lqmptBalance } = useLiquidMaxPainToken();
   const { isConnected, chain } = useConnection();
@@ -131,29 +131,29 @@ export default function Home() {
 
       <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
         <div className='border-b-3 border-stone-600 pb-1'>
-          <Switch isSelected={isETH} onChange={setIsETH}>
+          <Switch isSelected={isLQMPT} onChange={setIsLQMPT}>
             <Switch.Control>
               <Switch.Thumb />
             </Switch.Control>
-            <Label className="text-sm">swap for ETH</Label>
+            <Label className="text-sm">swap for LQMPT</Label>
           </Switch>
         </div>
       </div>
 
 
 
-      {isETH ?
+      {isLQMPT ?
         (
           <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
-            <LiquifyETH playAudio={playSound} />
-            <SolidifyETH playAudio={playSound} />
+            <Liquify playAudio={playSound} />
+            <Solidify playAudio={playSound} />
           </div>
         )
         :
         (
           <div className="flex flex-col md:flex-row gap-4 w-full md:justify-center">
-            <Liquify playAudio={playSound} />
-            <Solidify playAudio={playSound} />
+            <LiquifyETH playAudio={playSound} />
+            <SolidifyETH playAudio={playSound} />
           </div>
         )
       }

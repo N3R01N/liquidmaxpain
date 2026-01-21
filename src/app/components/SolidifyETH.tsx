@@ -133,13 +133,13 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
           <div className="flex justify-between w-full max-w-xs">
             <span className="text-gray-400 text-sm font-medium">You give:</span>
             <span className="font-mono text-[#75ffba] text-sm">
-              {selectedMaxPain ? `${buyPrice ? formatEther(BigInt(buyPrice)) : '0'} ETH` : '—'}
+              {selectedMaxPain ? `${buyPrice ? Number(formatEther(BigInt(buyPrice))).toFixed(4) : '0'} ETH` : '—'}
             </span>
           </div>
           <div className="flex justify-between w-full max-w-xs">
             <span className="text-gray-400 text-sm font-medium">You get:</span>
             <span className="font-mono text-[#75ffba] text-sm">
-              {selectedMaxPain ? `MAX PAIN #${selectedMaxPain}` : '—'}
+              {selectedMaxPain ? `MAX PAIN #${Number(selectedMaxPain) % 10 ** 4}` : '—'}
             </span>
           </div>
         </Card.Footer>

@@ -188,14 +188,14 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
                     <div className="flex justify-between w-full max-w-xs">
                         <span className="text-gray-400 text-sm font-medium">You give:</span>
                         <span className="font-mono text-[#75ffba] text-sm">
-                            {selectedMaxPain ? `MAX PAIN #${selectedMaxPain}` : '—'}
+                            {selectedMaxPain ? `MAX PAIN #${Number(selectedMaxPain) % 10 ** 4}` : '—'}
 
                         </span>
                     </div>
                     <div className="flex justify-between w-full max-w-xs">
                         <span className="text-gray-400 text-sm font-medium">You get:</span>
                         <span className="font-mono text-[#75ffba] text-sm">
-                            {selectedMaxPain ? `${sellPrice ? formatEther(BigInt(sellPrice)) : '0'} ETH` : '—'}
+                            {selectedMaxPain ? `${sellPrice ? Number(formatEther(BigInt(sellPrice))).toFixed(4) : '0'} ETH` : '—'}
                         </span>
                     </div>
                 </Card.Footer>

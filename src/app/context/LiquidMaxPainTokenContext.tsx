@@ -12,7 +12,7 @@ interface LiquidMaxPainTokenContextType {
 }
 
 const LQMPT_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
-const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? LiquidMaxPainToken_ABI_PROD : LiquidMaxPainToken_ABI_DEV;
+const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? require('../ABI/prod/LiquidMaxPainToken_ABI.json') : require('../ABI/dev/LiquidMaxPainToken_ABI.json');
 
 const LiquidMaxPainTokenContext = createContext<LiquidMaxPainTokenContextType>({
     balance: 0,
