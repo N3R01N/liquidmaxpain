@@ -14,29 +14,26 @@ import type { ReactNode } from 'react';
    Types
 ------------------------------------------------------------- */
 
-type BasicOrderResponse = {
-    type: 'basic';
-    chain: string;
-    value: string;
-    basicOrderParameters: any;
+type PriceData = {
+    priceWei: string;
+    currency: string;
 };
 
-type AdvancedOrderResponse = {
-    type: 'advanced';
-    chain: string;
-    value: string;
-    advancedOrder: any;
-    criteriaResolvers: any[];
-    fulfillerConduitKey: string;
+export type OpenSeaMarketData = {
+    nft: {
+        tokenId: string;
+    };
+    listing: PriceData;
+    offer: PriceData | null;
 };
-
-type OpenSeaListing = BasicOrderResponse | AdvancedOrderResponse;
 
 interface OpenSeaContextType {
-    osData: OpenSeaListing | null;
+    data: OpenSeaMarketData | null;
     isLoading: boolean;
     error: boolean | unknown;
-    mutate: () => void;
+
+    /** utils */
+    refetch: () => void;
 }
 
 /* ------------------------------------------------------------
@@ -44,10 +41,10 @@ interface OpenSeaContextType {
 ------------------------------------------------------------- */
 
 const defaultContext: OpenSeaContextType = {
-    osData: null,
+    data: null,
     isLoading: true,
     error: false,
-    mutate: () => { },
+    refetch: () => { },
 };
 
 const OpenSeaContext = createContext<OpenSeaContextType>(defaultContext);
@@ -56,10 +53,10 @@ const OpenSeaContext = createContext<OpenSeaContextType>(defaultContext);
    Fetcher
 ------------------------------------------------------------- */
 
-const fetchBestListing = async (): Promise<OpenSeaListing> => {
+const fetchMarketData = async (): Promise<OpenSeaMarketData> => {
     const res = await fetch('/api/opensea');
     if (!res.ok) {
-        throw new Error('Failed to fetch OpenSea listing');
+        throw new Error('Failed to fetch OpenSea market data');
     }
     return res.json();
 };
@@ -76,29 +73,33 @@ export function OpenSeaProvider({ children }: { children: ReactNode }) {
         setReady(true);
     }, []);
 
-    const { data, isLoading, error } = useQuery<OpenSeaListing>({
-        queryKey: ['opensea-best-listing'],
-        queryFn: fetchBestListing,
+    const { data, isLoading, error } = useQuery<OpenSeaMarketData>({
+        queryKey: ['opensea-market-data'],
+        queryFn: fetchMarketData,
         enabled: ready,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
 
-    const mutate = useCallback(() => {
+    /* ------------------------------------------------------------
+       Actions
+    ------------------------------------------------------------- */
+
+    const refetch = useCallback(() => {
         queryClient.refetchQueries({
-            queryKey: ['opensea-best-listing'],
+            queryKey: ['opensea-market-data'],
         });
     }, [queryClient]);
 
-    const value: OpenSeaContextType = {
-        osData: data ?? null,
-        isLoading,
-        error,
-        mutate,
-    };
-
     return (
-        <OpenSeaContext.Provider value={value}>
+        <OpenSeaContext.Provider
+            value={{
+                data: data ?? null,
+                isLoading,
+                error,
+                refetch,
+            }}
+        >
             {children}
         </OpenSeaContext.Provider>
     );

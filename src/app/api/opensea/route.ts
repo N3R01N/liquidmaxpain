@@ -2,15 +2,13 @@ import { NextResponse } from 'next/server';
 
 const OPENSEA_COLLECTION_SLUG = process.env.NEXT_PUBLIC_OPENSEA_COLLECTION_SLUG!;
 const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY!;
-const FULFILLER_ADDRESS = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ARBITRAGE_ADDRESS!;
-const SEAPORT_ADDRESS = process.env.NEXT_PUBLIC_SEAPORT_ADDRESS!;
 
 export async function GET() {
     try {
         /* ------------------------------------------------------------
-           1. Fetch best listing
+           1. Fetch best listing (lowest ask)
         ------------------------------------------------------------- */
-        const listingsRes = await fetch(
+        const listingRes = await fetch(
             `https://api.opensea.io/api/v2/listings/collection/${OPENSEA_COLLECTION_SLUG}/best`,
             {
                 headers: {
@@ -21,107 +19,74 @@ export async function GET() {
             }
         );
 
-        if (!listingsRes.ok) {
-            throw new Error('Failed to fetch best listing');
-        }
+        if (!listingRes.ok) throw new Error('Failed to fetch best listing');
 
-        const listingsData = await listingsRes.json();
-        const bestListing = listingsData?.listings?.[0];
+        const listingData = await listingRes.json();
+        const bestListing = listingData?.listings?.[0];
 
         if (!bestListing) {
             return NextResponse.json({ error: 'No listings found' }, { status: 404 });
         }
 
-        const { order_hash, chain, price, protocol_data } = bestListing;
-        const consideration = protocol_data?.parameters?.consideration?.[0];
+        /* ------------------------------------------------------------
+           2. Extract tokenId from listing
+        ------------------------------------------------------------- */
+        const offerItem = bestListing?.protocol_data?.parameters?.offer?.[0];
+        const tokenId = offerItem?.identifierOrCriteria;
 
-        if (!order_hash || !chain || !price || !consideration) {
+        if (!tokenId) {
             return NextResponse.json(
-                { error: 'Incomplete listing data' },
+                { error: 'Unable to extract tokenId from listing' },
                 { status: 400 }
             );
         }
 
         /* ------------------------------------------------------------
-           2. Fetch fulfillment data
+           3. Fetch best offer for this NFT (parallel if needed in future)
+           Currently we must wait for tokenId from listing
         ------------------------------------------------------------- */
-        const fulfillmentRes = await fetch(
-            'https://api.opensea.io/api/v2/listings/fulfillment_data',
+        const offerResPromise = fetch(
+            `https://api.opensea.io/api/v2/offers/collection/${OPENSEA_COLLECTION_SLUG}/nfts/${tokenId}/best`,
             {
-                method: 'POST',
                 headers: {
                     'X-API-KEY': OPENSEA_API_KEY,
                     accept: 'application/json',
-                    'content-type': 'application/json',
                 },
-                body: JSON.stringify({
-                    listing: {
-                        hash: order_hash,
-                        chain,
-                        protocol_address: SEAPORT_ADDRESS,
-                    },
-                    fulfiller: {
-                        address: FULFILLER_ADDRESS,
-                    },
-                    consideration: {
-                        asset_contract_address: consideration.token,
-                        token_id: consideration.identifierOrCriteria,
-                    },
-                    include_optional_creator_fees: false,
-                }),
+                cache: 'no-store',
             }
         );
 
-        if (!fulfillmentRes.ok) {
-            const errText = await fulfillmentRes.text();
-            throw new Error(`Fulfillment fetch failed: ${errText}`);
-        }
+        // Wait for both listing and offer if more things added in future
+        const [offerRes] = await Promise.all([offerResPromise]);
 
-        const fulfillmentData = await fulfillmentRes.json();
-        const inputData =
-            fulfillmentData?.fulfillment_data?.transaction?.input_data;
+        if (!offerRes.ok) throw new Error('Failed to fetch best offer');
 
-        if (!inputData) {
-            throw new Error('Missing fulfillment input_data');
-        }
+        const offerData = await offerRes.json();
+
+        console.log("price", offerData.price.value);
 
         /* ------------------------------------------------------------
-           3. Payload-based order detection
+           4. Normalize & return market data
         ------------------------------------------------------------- */
-        const hasBasic = !!inputData.parameters;
-        const hasAdvanced = !!inputData.advancedOrder;
-
-        if (hasBasic === hasAdvanced) {
-            throw new Error(
-                'Ambiguous fulfillment payload: cannot determine order type'
-            );
-        }
-
-        /* ------------------------------------------------------------
-           4. Return discriminated execution payload
-        ------------------------------------------------------------- */
-        if (hasBasic) {
-            return NextResponse.json({
-                type: 'basic',
-                chain,
-                value: price.current.value,
-                basicOrderParameters: inputData.parameters,
-            });
-        }
-
-        // advanced
         return NextResponse.json({
-            type: 'advanced',
-            chain,
-            value: price.current.value,
-            advancedOrder: inputData.advancedOrder,
-            criteriaResolvers: inputData.criteriaResolvers ?? [],
-            fulfillerConduitKey: inputData.fulfillerConduitKey,
+            nft: {
+                tokenId,
+            },
+            listing: {
+                priceWei: bestListing.price.current.value,
+                currency: bestListing.price.current.currency,
+            },
+            offer: offerData
+                ? {
+                    priceWei: offerData.price.value,
+                    currency: offerData.price.currency,
+                }
+                : null,
         });
     } catch (err) {
-        console.error('OpenSea pipeline failed:', err);
+        console.error('Failed to fetch OpenSea market data:', err);
         return NextResponse.json(
-            { error: 'Failed to fetch OpenSea fulfillment data' },
+            { error: 'Failed to fetch OpenSea market data' },
             { status: 500 }
         );
     }
