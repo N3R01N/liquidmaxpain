@@ -54,7 +54,7 @@ export default function Arbitrage() {
 
                 <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-neutral-300">
-                        You buy here
+                        You buy
                     </span>
                     <span className="text-lg font-bold text-green-400">
                         {buyPrice
@@ -66,7 +66,7 @@ export default function Arbitrage() {
 
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-neutral-300">
-                        You sell here
+                        You sell
                     </span>
                     <span className="text-lg font-bold text-red-400">
                         {sellPrice
@@ -112,7 +112,7 @@ export default function Arbitrage() {
 
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-neutral-300">
-                        You buy on OpenSea
+                        You buy
                     </span>
                     <span className="text-lg font-bold text-blue-400">
                         {osSellEth
@@ -123,7 +123,7 @@ export default function Arbitrage() {
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-neutral-300">
-                        You sell on OpenSea
+                        You sell
                     </span>
                     <span className="text-lg font-bold text-blue-400">
                         {osBuyEth
