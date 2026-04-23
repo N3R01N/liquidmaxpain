@@ -26,9 +26,11 @@ export const metadata: Metadata = {
 const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
         <html suppressHydrationWarning lang='en'>
-            <link rel="icon" href="/favicon.ico" sizes="16x16" />
-            <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
-            <link rel="apple-touch-icon" href="/favicon.jpg" sizes="180x180" />
+            <head>
+                <link rel="icon" href="/favicon.ico" sizes="16x16" />
+                <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
+                <link rel="apple-touch-icon" href="/favicon.jpg" sizes="180x180" />
+            </head>
             <body className={`${silk.className} bg-background text-foreground antialiased`}>
                 <Analytics />
                 <Providers>{children}</Providers>

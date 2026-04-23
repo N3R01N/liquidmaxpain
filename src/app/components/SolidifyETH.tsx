@@ -37,8 +37,8 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
     functionName: 'swapEthForMaxPain',
     args: [address as `0x${string}`, selectedMaxPain as Key],
     account: address,
-    value: BigInt(buyPrice as number),
-    query: { enabled: !!selectedMaxPain && !!address && !!buyPrice && data?.value as bigint >= buyPrice },
+    value: buyPrice,
+    query: { enabled: !!selectedMaxPain && !!address && !!buyPrice && (data?.value ?? 0n) >= buyPrice },
   });
 
   const { mutate: buyMaxPain, data: buyMaxPainHash, isPending: isBuyPending } = useWriteContract();
@@ -54,7 +54,7 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
       refetch();
       playAudio()
     }
-  }, [buyMaxPainConfirmed]);
+  }, [buyMaxPainConfirmed, mutate, refetch, playAudio]);
 
   useEffect(() => {
     if (buyMaxPainHash && isConfirming) {
@@ -121,7 +121,7 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
 
             <Button
               variant="primary"
-              isDisabled={balanceOfLiquidMaxPain == 0 || data?.value as bigint < BigInt(buyPrice as number) || !selectedMaxPain || isSimulating}
+              isDisabled={balanceOfLiquidMaxPain === 0 || (data?.value ?? 0n) < buyPrice || !selectedMaxPain || isSimulating}
               onPress={handleBuy}
               className="mt-2 w-full bg-[#fc017d] text-black font-bold hover:bg-[#e0016f] active:bg-[#c80161] transition-all duration-200"
             >
@@ -133,7 +133,7 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
           <div className="flex justify-between w-full max-w-xs">
             <span className="text-gray-400 text-sm font-medium">You give:</span>
             <span className="font-mono text-[#75ffba] text-sm">
-              {selectedMaxPain ? `${buyPrice ? Number(formatEther(BigInt(buyPrice))).toFixed(4) : '0'} ETH` : '—'}
+              {selectedMaxPain ? `${buyPrice ? Number(formatEther(buyPrice)).toFixed(4) : '0'} ETH` : '—'}
             </span>
           </div>
           <div className="flex justify-between w-full max-w-xs">

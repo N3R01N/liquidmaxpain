@@ -8,8 +8,8 @@ interface LiquidMaxPainSwapContextType {
     refetch: () => void;
     isLoading: boolean;
     error: Error | null;
-    sellPrice?: number;
-    buyPrice?: number;
+    sellPrice: bigint;
+    buyPrice: bigint;
 }
 
 const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
@@ -18,14 +18,14 @@ const QUOTER_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_QUOTER_CONTRACT_ADDRESS 
 const QUOTER_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? require('../ABI/prod/QUOTER_ABI.json') : require('../ABI/dev/QUOTER_ABI.json');
 
 const LiquidMaxPainSwapContext = createContext<LiquidMaxPainSwapContextType>({
-    buyPrice: 0,
-    sellPrice: 0,
+    buyPrice: 0n,
+    sellPrice: 0n,
     refetch: () => { },
     isLoading: false,
     error: null,
 });
 
-const SellConfig: any = {
+const SellConfig = {
     poolKey: {
         currency0: '0x0000000000000000000000000000000000000000',
         currency1: LiquidMaxPain_address,
@@ -35,10 +35,10 @@ const SellConfig: any = {
     },
     zeroForOne: false,
     exactAmount: parseEther("100"),
-    hookData: ''
-}
+    hookData: '0x' as `0x${string}`,
+} as const;
 
-const BuyConfig: any = {
+const BuyConfig = {
     poolKey: {
         currency0: '0x0000000000000000000000000000000000000000',
         currency1: LiquidMaxPain_address,
@@ -48,20 +48,25 @@ const BuyConfig: any = {
     },
     zeroForOne: true,
     exactAmount: parseEther("100"),
-    hookData: ''
-}
+    hookData: '0x' as `0x${string}`,
+} as const;
 
 export function LiquidMaxPainSwapProvider({ children }: { children: ReactNode }) {
     const { address } = useConnection();
 
-    const [buyPrice, setBuyPrice] = useState<number>(0);
-    const [sellPrice, setSellPrice] = useState<number>(0);
+    const [buyPrice, setBuyPrice] = useState<bigint>(0n);
+    const [sellPrice, setSellPrice] = useState<bigint>(0n);
 
     const { data: sellData, isLoading: isLoadingSell, error: sellError, refetch: refetchSell } = useReadContract({
         address: QUOTER_CONTRACT_ADDRESS,
         abi: QUOTER_ABI,
         functionName: 'quoteExactInputSingle',
         args: [SellConfig],
+        query: {
+            staleTime: 1000 * 30,
+            retry: 3,
+            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+        },
     });
 
     const { data: buyData, isLoading: isLoadingBuy, error: buyError, refetch: refetchBuy } = useReadContract({
@@ -69,12 +74,17 @@ export function LiquidMaxPainSwapProvider({ children }: { children: ReactNode })
         abi: QUOTER_ABI,
         functionName: 'quoteExactOutputSingle',
         args: [BuyConfig],
+        query: {
+            staleTime: 1000 * 30,
+            retry: 3,
+            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+        },
     });
 
     useEffect(() => {
         if (buyData) {
-            const [amountOut, gasEstimate] = buyData as [bigint, bigint];
-            setBuyPrice(Number(amountOut));
+            const [amountOut] = buyData as [bigint, bigint];
+            setBuyPrice(amountOut);
         }
         if (buyError) {
             console.error("Buy Quote failed:", buyError);
@@ -83,8 +93,8 @@ export function LiquidMaxPainSwapProvider({ children }: { children: ReactNode })
 
     useEffect(() => {
         if (sellData) {
-            const [amountOut, gasEstimate] = sellData as [bigint, bigint];
-            setSellPrice(Number(amountOut));
+            const [amountOut] = sellData as [bigint, bigint];
+            setSellPrice(amountOut);
         }
         if (sellError) {
             console.error("Sell Quote failed:", sellError);

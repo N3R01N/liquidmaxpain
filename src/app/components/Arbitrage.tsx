@@ -28,9 +28,9 @@ export default function Arbitrage() {
         ? data.listing.currency
         : null;
 
-    // your app prices (assume they are already bigint!)
-    const appBuyEth: bigint = BigInt(buyPrice!) ?? 0n;
-    const appSellEth: bigint = BigInt(sellPrice!) ?? 0n;
+    // your app prices (already bigint from context)
+    const appBuyEth: bigint = buyPrice ?? 0n;
+    const appSellEth: bigint = sellPrice ?? 0n;
 
     // Profit calculations in wei
     const profitEthBuyOs: bigint = appSellEth - osSellEth; // Buy on OpenSea, sell here
@@ -58,7 +58,7 @@ export default function Arbitrage() {
                     </span>
                     <span className="text-lg font-bold text-green-400">
                         {buyPrice
-                            ? Number(formatEther(BigInt(buyPrice))).toFixed(4)
+                            ? Number(formatEther(buyPrice)).toFixed(4)
                             : '0'}{' '}
                         ETH
                     </span>
@@ -70,13 +70,13 @@ export default function Arbitrage() {
                     </span>
                     <span className="text-lg font-bold text-red-400">
                         {sellPrice
-                            ? Number(formatEther(BigInt(sellPrice))).toFixed(4)
+                            ? Number(formatEther(sellPrice)).toFixed(4)
                             : '0'}{' '}
                         ETH
                     </span>
                 </div>
             </div>
-            {profitEthBuyOs > 0 && (
+            {profitEthBuyOs > 0n && (
                 <div className="mt-4 flex items-center gap-3">
                     <p className="mt-2 text-xs text-green-300">
                         Arbitrage opportunity
@@ -85,20 +85,20 @@ export default function Arbitrage() {
                         Buy on OpenSea <span className="mx-1">→</span> Sell here
                     </span>
                     <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm font-semibold text-green-400">
-                        +{Number(formatEther(BigInt(profitEthBuyOs))).toFixed(4)}&nbsp;ETH
+                        +{Number(formatEther(profitEthBuyOs)).toFixed(4)}&nbsp;ETH
                     </span>
                 </div>
             )}
-            {profitEthSellOs > 0 && (
+            {profitEthSellOs > 0n && (
                 <div className="mt-4 flex items-center gap-3">
                     <p className="mt-2 text-xs text-green-300">
                         Arbitrage opportunity
                     </p>
                     <span className="text-xs font-medium text-neutral-400">
-                        Buy here <span className="mx-1">→</span> Buy on OpenSea
+                        Buy here <span className="mx-1">→</span> Sell on OpenSea
                     </span>
                     <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm font-semibold text-green-400">
-                        +{Number(formatEther(BigInt(profitEthSellOs))).toFixed(4)}
+                        +{Number(formatEther(profitEthSellOs)).toFixed(4)}
                         ETH
                     </span>
                 </div>
@@ -116,7 +116,7 @@ export default function Arbitrage() {
                     </span>
                     <span className="text-lg font-bold text-blue-400">
                         {osSellEth
-                            ? Number(formatEther(BigInt(osSellEth))).toFixed(4)
+                            ? Number(formatEther(osSellEth)).toFixed(4)
                             : '0'}{' '}
                         {osSellCurrency}
                     </span>
@@ -127,7 +127,7 @@ export default function Arbitrage() {
                     </span>
                     <span className="text-lg font-bold text-blue-400">
                         {osBuyEth
-                            ? Number(formatEther(BigInt(osBuyEth))).toFixed(4)
+                            ? Number(formatEther(osBuyEth)).toFixed(4)
                             : '0'}{' '}
                         {osBuyCurrency}
                     </span>

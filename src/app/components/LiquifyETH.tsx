@@ -59,7 +59,7 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
         address: LiquidMaxpainSwap_address,
         abi: LIQUID_MAX_PAIN_SWAP_ABI,
         functionName: 'swapMaxPainForEth',
-        args: [BigInt(sellPrice as number), address as `0x${string}`, selectedMaxPain as Key],
+        args: [sellPrice, address as `0x${string}`, selectedMaxPain as Key],
         account: address,
         query: { enabled: !!selectedMaxPain && !!address && isApproved && !!sellPrice },
     });
@@ -86,7 +86,7 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
         if (approveMaxPainConfirmed) {
             refetchIsApprovedForAll();
         }
-    }, [approveMaxPainConfirmed]);
+    }, [approveMaxPainConfirmed, refetchIsApprovedForAll]);
 
     // Reset selection and refresh NFTs after successful transaction
     useEffect(() => {
@@ -96,7 +96,7 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
             mutate();
             playAudio()
         }
-    }, [sellMaxPainConfirmed]);
+    }, [sellMaxPainConfirmed, refetch, mutate, playAudio]);
 
     useEffect(() => {
         if (simulateError) {
@@ -141,8 +141,8 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
                     <div className='flex flex-col w-64 items-center justify-center gap-4'>
                         <Select
                             className="w-[256px] data-[open=true]:bg-neutral-800"
-                            placeholder="Select max pain to liquify"
-                            aria-label="Select max pain to liquify"
+                            placeholder="Select max pain to sell"
+                            aria-label="Select max pain to sell"
                             value={selectedMaxPain}
                             onChange={setSelectedMaxPain}>
                             <Select.Trigger className="bg-neutral-800 text-[#75ffba] data-[placeholder]:text-[#75ffba] hover:bg-stone-700 transition-colors">
@@ -195,7 +195,7 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
                     <div className="flex justify-between w-full max-w-xs">
                         <span className="text-gray-400 text-sm font-medium">You get:</span>
                         <span className="font-mono text-[#75ffba] text-sm">
-                            {selectedMaxPain ? `${sellPrice ? Number(formatEther(BigInt(sellPrice))).toFixed(4) : '0'} ETH` : '—'}
+                            {selectedMaxPain ? `${sellPrice ? Number(formatEther(sellPrice)).toFixed(4) : '0'} ETH` : '—'}
                         </span>
                     </div>
                 </Card.Footer>

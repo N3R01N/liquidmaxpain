@@ -23,9 +23,9 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
     return createWagmiConfig(appConfig.projectId);
   }, [appConfig?.projectId]);
 
-  useEffect(() => setMounted(true), []);
+  const [client] = useState(() => new QueryClient());
 
-  const client = new QueryClient();
+  useEffect(() => setMounted(true), []);
 
   // Show loading state while config is being fetched
   if (!config) {

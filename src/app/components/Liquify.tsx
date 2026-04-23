@@ -56,7 +56,7 @@ export default function Liquify({ playAudio }: LiquifyProps) {
             refetch();
             playAudio()
         }
-    }, [sendMaxPainConfirmed]);
+    }, [sendMaxPainConfirmed, mutate, refetch, playAudio]);
 
     useEffect(() => {
         if (simulateError) {

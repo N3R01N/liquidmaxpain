@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
 import Image from "next/image";
-import Head from 'next/head';
 import { Button, Link, Label, Switch } from "@heroui/react";
+import { formatEther } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import { useSwitchChain, useConnection } from "wagmi";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
@@ -20,7 +20,6 @@ const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS;
 const desiredNetworkId = 1;
 
 export default function Home() {
-  const [isClientSide, setIsClientSide] = useState(false);
   const [isLQMPT, setIsLQMPT] = React.useState(false);
   const { balanceOfLiquidMaxPain } = useNFTs();
   const { balance: lqmptBalance } = useLiquidMaxPainToken();
@@ -35,7 +34,6 @@ export default function Home() {
 
   useEffect(() => {
     document.title = '~LiquidMaxPain~';
-    setIsClientSide(true);
   }, []);
 
   const handleSwitchChain = () => {
@@ -64,11 +62,6 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-6 text-[#75ffba] tracking-tight">
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>$LiquidMaxPain</title>
-      </Head>
-
       <div className='bg-neutral-900 p-4 sm:p-6 rounded-xl flex flex-col items-center text-center w-full max-w-4xl mx-auto'>
         <div className='border-b-4 border-stone-600 pb-4 w-full'>
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-2 leading-tight">
@@ -125,7 +118,7 @@ export default function Home() {
         )}</div>
       <div className='bg-neutral-900 p-2 rounded-xl flex flex-col items-center text-center w-full md:w-auto '>
         <div className='border-b-3 border-stone-600 pb-1'>
-          <h2 className="text-lg md:text-xl">You have {lqmptBalance ? formatter.format((BigInt(lqmptBalance) / BigInt(10 ** 20))) : formatter.format(0)} Max Pain</h2>
+          <h2 className="text-lg md:text-xl">You have {lqmptBalance ? formatter.format(Number(formatEther(lqmptBalance)) / 100) : formatter.format(0)} Max Pain</h2>
         </div>
       </div>
 

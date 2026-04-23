@@ -63,8 +63,6 @@ export async function GET() {
 
         const offerData = await offerRes.json();
 
-        console.log("price", offerData.price.value);
-
         /* ------------------------------------------------------------
            4. Normalize & return market data
         ------------------------------------------------------------- */

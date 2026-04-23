@@ -39,7 +39,7 @@ export default function TransactionModal({ isOpen, hash, isConfirming, isConfirm
                         <>
                             <Modal.CloseTrigger />
                             <Modal.Header>
-                                <Modal.Heading>Welcome to HeroUI</Modal.Heading>
+                                <Modal.Heading>{action}</Modal.Heading>
                             </Modal.Header>
                             <Modal.Body className="flex flex-col items-center justify-center py-10 px-8">
                                 {/* Confirming State */}

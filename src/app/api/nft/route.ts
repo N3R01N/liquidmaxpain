@@ -34,8 +34,8 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const address = searchParams.get('address');
 
-    if (!address) {
-        return NextResponse.json({ error: 'Missing address' }, { status: 400 });
+    if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address)) {
+        return NextResponse.json({ error: 'Missing or invalid address' }, { status: 400 });
     }
 
     try {

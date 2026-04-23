@@ -50,7 +50,7 @@ export default function Solidify({ playAudio }: SolidifyProps) {
       refetch();
       playAudio()
     }
-  }, [solidifyMaxPainConfirmed]);
+  }, [solidifyMaxPainConfirmed, mutate, refetch, playAudio]);
 
   useEffect(() => {
     if (solidifyMaxPainHash && isConfirming) {

@@ -2,11 +2,8 @@
 import { createContext, useContext } from 'react';
 import { useReadContract, useConnection } from 'wagmi';
 import type { ReactNode } from 'react';
-import LiquidMaxPainToken_ABI_DEV from "../ABI/dev/LiquidMaxPainToken_ABI.json";
-import LiquidMaxPainToken_ABI_PROD from "../ABI/prod/LiquidMaxPainToken_ABI.json";
-
 interface LiquidMaxPainTokenContextType {
-    balance: number;
+    balance: bigint;
     refetch: () => void;
     isLoading: boolean;
 }
@@ -15,7 +12,7 @@ const LQMPT_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${st
 const LiquidMaxPainToken_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? require('../ABI/prod/LiquidMaxPainToken_ABI.json') : require('../ABI/dev/LiquidMaxPainToken_ABI.json');
 
 const LiquidMaxPainTokenContext = createContext<LiquidMaxPainTokenContextType>({
-    balance: 0,
+    balance: 0n,
     refetch: () => { },
     isLoading: false,
 });
@@ -37,7 +34,7 @@ export function LiquidMaxPainTokenProvider({ children }: { children: ReactNode }
     });
 
     const value: LiquidMaxPainTokenContextType = {
-        balance: balance as number || 0,
+        balance: (balance as bigint) ?? 0n,
         refetch, // ✅ Expose the refetch function
         isLoading,
     };
