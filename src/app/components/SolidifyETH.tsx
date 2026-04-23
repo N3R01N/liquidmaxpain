@@ -23,7 +23,7 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
   // Wagmi hooks
   const { address } = useConnection();
   const { balanceOfLiquidMaxPain, ownedNftsByLiquidMaxPain, mutate } = useNFTs();
-  const { buyPrice, refetch } = useLiquidMaxPainSwap();
+  const { buyPrice, buyLiquid, refetch } = useLiquidMaxPainSwap();
 
   const { data } = useBalance({
     address: address,
@@ -38,7 +38,7 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
     args: [address as `0x${string}`, selectedMaxPain as Key],
     account: address,
     value: buyPrice,
-    query: { enabled: !!selectedMaxPain && !!address && !!buyPrice && (data?.value ?? 0n) >= buyPrice },
+    query: { enabled: !!selectedMaxPain && !!address && buyLiquid && !!buyPrice && (data?.value ?? 0n) >= buyPrice },
   });
 
   const { mutate: buyMaxPain, data: buyMaxPainHash, isPending: isBuyPending } = useWriteContract();
@@ -119,9 +119,14 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
               </Select.Popover>
             </Select>
 
+            {!buyLiquid && (
+              <p className="text-xs text-yellow-500 text-center">
+                Pool has insufficient liquidity for buying
+              </p>
+            )}
             <Button
               variant="primary"
-              isDisabled={balanceOfLiquidMaxPain === 0 || (data?.value ?? 0n) < buyPrice || !selectedMaxPain || isSimulating}
+              isDisabled={!buyLiquid || balanceOfLiquidMaxPain === 0 || (data?.value ?? 0n) < buyPrice || !selectedMaxPain || isSimulating}
               onPress={handleBuy}
               className="mt-2 w-full bg-[#fc017d] text-black font-bold hover:bg-[#e0016f] active:bg-[#c80161] transition-all duration-200"
             >
@@ -133,7 +138,9 @@ export default function SolidifyETH({ playAudio }: SolidifyProps) {
           <div className="flex justify-between w-full max-w-xs">
             <span className="text-gray-400 text-sm font-medium">You give:</span>
             <span className="font-mono text-[#75ffba] text-sm">
-              {selectedMaxPain ? `${buyPrice ? Number(formatEther(buyPrice)).toFixed(4) : '0'} ETH` : '—'}
+              {!buyLiquid
+                ? 'No liquidity'
+                : selectedMaxPain ? `${buyPrice ? Number(formatEther(buyPrice)).toFixed(4) : '0'} ETH` : '—'}
             </span>
           </div>
           <div className="flex justify-between w-full max-w-xs">

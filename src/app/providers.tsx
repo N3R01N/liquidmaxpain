@@ -10,26 +10,39 @@ import { LiquidMaxPainTokenProvider } from './context/LiquidMaxPainTokenContext'
 import { LiquidMaxPainSwapProvider } from './context/LiquidMaxPainSwapContext';
 import type { ReactNode } from 'react';
 import { ThemeProvider } from 'next-themes';
-import { useConfig } from './hooks/useConfig';
-import { createWagmiConfig } from './wagmi.config';
+import { mainnet, sepolia } from 'wagmi/chains';
+import Image from 'next/image';
 
 export function Providers({ children }: Readonly<{ children: ReactNode }>) {
   const [mounted, setMounted] = useState(false);
-  const appConfig = useConfig();
-
-  // Memoize to prevent recreating config on every render
-  const config = useMemo(() => {
-    if (!appConfig?.projectId) return null;
-    return createWagmiConfig(appConfig.projectId);
-  }, [appConfig?.projectId]);
-
   const [client] = useState(() => new QueryClient());
+
+  // Create wagmi config client-side only — RainbowKit's getDefaultConfig
+  // validates projectId eagerly and throws during SSR prerendering
+  const config = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return getDefaultConfig({
+      appName: 'LiquidMaxPain',
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+      chains: [mainnet, sepolia],
+    });
+  }, []);
 
   useEffect(() => setMounted(true), []);
 
-  // Show loading state while config is being fetched
   if (!config) {
-    return <div>Loading wallet configuration...</div>;
+    return (
+      <main className="flex items-center justify-center min-h-screen bg-black">
+        <Image
+          src="/MAX_PAIN.gif"
+          width={225}
+          height={225}
+          alt="Loading..."
+          priority
+          unoptimized
+        />
+      </main>
+    );
   }
 
   return (
@@ -50,7 +63,16 @@ export function Providers({ children }: Readonly<{ children: ReactNode }>) {
                 </OpenSeaProvider>
               </NFTProvider>
             ) : (
-              <div className="min-h-screen bg-black" /> // Prevents flash
+              <main className="flex items-center justify-center min-h-screen bg-black">
+                <Image
+                  src="/MAX_PAIN.gif"
+                  width={225}
+                  height={225}
+                  alt="Loading..."
+                  priority
+                  unoptimized
+                />
+              </main>
             )}
           </RainbowKitProvider>
         </QueryClientProvider>

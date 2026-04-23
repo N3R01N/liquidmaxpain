@@ -28,7 +28,7 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
     // Wagmi hooks
     const { address } = useConnection();
     const { balanceOfConnectedAddress, ownedNftsByConnectedAddress, mutate } = useNFTs();
-    const { sellPrice, refetch } = useLiquidMaxPainSwap();
+    const { sellPrice, sellLiquid, refetch } = useLiquidMaxPainSwap();
 
     const [isApproved, setIsApproved] = useState<boolean>(false);
 
@@ -61,7 +61,7 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
         functionName: 'swapMaxPainForEth',
         args: [sellPrice, address as `0x${string}`, selectedMaxPain as Key],
         account: address,
-        query: { enabled: !!selectedMaxPain && !!address && isApproved && !!sellPrice },
+        query: { enabled: !!selectedMaxPain && !!address && isApproved && sellLiquid && !!sellPrice },
     });
 
     useEffect(() => {
@@ -166,9 +166,14 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
                                 </ListBox>
                             </Select.Popover>
                         </Select>
+                        {!sellLiquid && (
+                            <p className="text-xs text-yellow-500 text-center">
+                                Pool has insufficient liquidity for selling
+                            </p>
+                        )}
                         {isApproved ? (<Button
                             variant="primary"
-                            isDisabled={!address || Number(balanceOfConnectedAddress) === 0 || !selectedMaxPain || isSimulating}
+                            isDisabled={!sellLiquid || !address || Number(balanceOfConnectedAddress) === 0 || !selectedMaxPain || isSimulating}
                             onPress={handleSell}
                             className="mt-2 w-full bg-[#fc017d] text-black font-bold hover:bg-[#e0016f] active:bg-[#c80161] transition-all duration-200"
                         >
@@ -195,7 +200,9 @@ export default function LiquifyETH({ playAudio }: LiquifyProps) {
                     <div className="flex justify-between w-full max-w-xs">
                         <span className="text-gray-400 text-sm font-medium">You get:</span>
                         <span className="font-mono text-[#75ffba] text-sm">
-                            {selectedMaxPain ? `${sellPrice ? Number(formatEther(sellPrice)).toFixed(4) : '0'} ETH` : '—'}
+                            {!sellLiquid
+                                ? 'No liquidity'
+                                : selectedMaxPain ? `${sellPrice ? Number(formatEther(sellPrice)).toFixed(4) : '0'} ETH` : '—'}
                         </span>
                     </div>
                 </Card.Footer>

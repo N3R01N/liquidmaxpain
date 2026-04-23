@@ -1,112 +1,77 @@
 'use client';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useReadContract, useConnection } from 'wagmi';
+import { createContext, useContext, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { parseEther } from 'viem';
+
+interface PriceResponse {
+    sellPrice: string | null;
+    buyPrice: string | null;
+    spotPrice: string | null;
+    sellLiquid: boolean;
+    buyLiquid: boolean;
+}
 
 interface LiquidMaxPainSwapContextType {
     refetch: () => void;
     isLoading: boolean;
     error: Error | null;
+    /** Firm sell price from the quoter — 0n when sell side is illiquid */
     sellPrice: bigint;
+    /** Firm buy price from the quoter — 0n when buy side is illiquid */
     buyPrice: bigint;
+    /** Indicative spot price from the pool (always available if pool exists) */
+    spotPrice: bigint;
+    /** Whether the pool has enough liquidity to sell 100 LQMPT */
+    sellLiquid: boolean;
+    /** Whether the pool has enough liquidity to buy 100 LQMPT */
+    buyLiquid: boolean;
 }
-
-const LiquidMaxPain_address = process.env.NEXT_PUBLIC_LIQUID_MAX_PAIN_ADDRESS as `0x${string}`;
-
-const QUOTER_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_QUOTER_CONTRACT_ADDRESS as `0x${string}`;
-const QUOTER_ABI = process.env.NEXT_PUBLIC_ENV === 'prod' ? require('../ABI/prod/QUOTER_ABI.json') : require('../ABI/dev/QUOTER_ABI.json');
 
 const LiquidMaxPainSwapContext = createContext<LiquidMaxPainSwapContextType>({
     buyPrice: 0n,
     sellPrice: 0n,
+    spotPrice: 0n,
     refetch: () => { },
     isLoading: false,
     error: null,
+    sellLiquid: false,
+    buyLiquid: false,
 });
 
-const SellConfig = {
-    poolKey: {
-        currency0: '0x0000000000000000000000000000000000000000',
-        currency1: LiquidMaxPain_address,
-        fee: 3000,
-        tickSpacing: 60,
-        hooks: "0x0000000000000000000000000000000000000000",
-    },
-    zeroForOne: false,
-    exactAmount: parseEther("100"),
-    hookData: '0x' as `0x${string}`,
-} as const;
-
-const BuyConfig = {
-    poolKey: {
-        currency0: '0x0000000000000000000000000000000000000000',
-        currency1: LiquidMaxPain_address,
-        fee: 3000,
-        tickSpacing: 60,
-        hooks: "0x0000000000000000000000000000000000000000",
-    },
-    zeroForOne: true,
-    exactAmount: parseEther("100"),
-    hookData: '0x' as `0x${string}`,
-} as const;
+async function fetchPrices(): Promise<PriceResponse> {
+    const res = await fetch('/api/price');
+    if (!res.ok) {
+        throw new Error('Failed to fetch prices');
+    }
+    return res.json();
+}
 
 export function LiquidMaxPainSwapProvider({ children }: { children: ReactNode }) {
-    const { address } = useConnection();
+    const queryClient = useQueryClient();
 
-    const [buyPrice, setBuyPrice] = useState<bigint>(0n);
-    const [sellPrice, setSellPrice] = useState<bigint>(0n);
-
-    const { data: sellData, isLoading: isLoadingSell, error: sellError, refetch: refetchSell } = useReadContract({
-        address: QUOTER_CONTRACT_ADDRESS,
-        abi: QUOTER_ABI,
-        functionName: 'quoteExactInputSingle',
-        args: [SellConfig],
-        query: {
-            staleTime: 1000 * 30,
-            retry: 3,
-            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
-        },
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['swap-prices'],
+        queryFn: fetchPrices,
+        staleTime: 1000 * 30,
+        refetchInterval: 1000 * 60,
+        retry: 3,
+        retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+        refetchOnWindowFocus: false,
     });
 
-    const { data: buyData, isLoading: isLoadingBuy, error: buyError, refetch: refetchBuy } = useReadContract({
-        address: QUOTER_CONTRACT_ADDRESS,
-        abi: QUOTER_ABI,
-        functionName: 'quoteExactOutputSingle',
-        args: [BuyConfig],
-        query: {
-            staleTime: 1000 * 30,
-            retry: 3,
-            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
-        },
-    });
-
-    useEffect(() => {
-        if (buyData) {
-            const [amountOut] = buyData as [bigint, bigint];
-            setBuyPrice(amountOut);
-        }
-        if (buyError) {
-            console.error("Buy Quote failed:", buyError);
-        }
-    }, [buyData, buyError]);
-
-    useEffect(() => {
-        if (sellData) {
-            const [amountOut] = sellData as [bigint, bigint];
-            setSellPrice(amountOut);
-        }
-        if (sellError) {
-            console.error("Sell Quote failed:", sellError);
-        }
-    }, [sellData, sellError]);
+    const refetch = useCallback(() => {
+        queryClient.refetchQueries({ queryKey: ['swap-prices'] });
+    }, [queryClient]);
 
     const value: LiquidMaxPainSwapContextType = {
-        sellPrice: sellPrice,
-        buyPrice: buyPrice,
-        refetch: () => { refetchSell(); refetchBuy(); }, // ✅ Expose the refetch function
-        error: sellError || buyError,
-        isLoading: isLoadingSell || isLoadingBuy,
+        sellPrice: data?.sellPrice ? BigInt(data.sellPrice) : 0n,
+        buyPrice: data?.buyPrice ? BigInt(data.buyPrice) : 0n,
+        spotPrice: data?.spotPrice ? BigInt(data.spotPrice) : 0n,
+        refetch,
+        error: error ?? null,
+        isLoading,
+        sellLiquid: data?.sellLiquid ?? false,
+        buyLiquid: data?.buyLiquid ?? false,
     };
 
     return (
